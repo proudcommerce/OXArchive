@@ -71,8 +71,7 @@ class Actions_Main extends oxAdminDetails
 
         if ( oxConfig::getParameter("aoc") ) {
             // generating category tree for select list
-            $sChosenArtCat = oxConfig::getParameter( "artcat");
-            $sChosenArtCat = $this->_getCategoryTree( "artcattree", $sChosenArtCat, $soxId);
+            $this->_createCategoryTree( "artcattree", $soxId);
 
             $oActionsMainAjax = oxNew( 'actions_main_ajax' );
             $this->_aViewData['oxajax'] = $oActionsMainAjax->getColumns();
@@ -88,8 +87,7 @@ class Actions_Main extends oxAdminDetails
                     switch( $iAoc ) {
                         case 'article':
                             // generating category tree for select list
-                            $sChosenArtCat = oxConfig::getParameter( "artcat");
-                            $sChosenArtCat = $this->_getCategoryTree( "artcattree", $sChosenArtCat, $soxId);
+                            $this->_createCategoryTree( "artcattree", $soxId);
 
                             if ($oArticle = $oPromotion->getBannerArticle()) {
                                 $this->_aViewData['actionarticle_artnum'] = $oArticle->oxarticles__oxartnum->value;

@@ -45,7 +45,7 @@ class oxwCategoryTree extends oxWidget
     protected $_sThisTemplate = 'widget/sidebar/categorytree.tpl';
 
     /**
-     * Executes parent::render(), assignes template name and returns it
+     * Executes parent::render(), assigns template name and returns it
      *
      * @return string
      */

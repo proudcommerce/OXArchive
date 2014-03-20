@@ -127,14 +127,14 @@ class oxBasket extends oxSuperCfg
     protected $_aCosts = array();
 
     /**
-     * Sum price of articles applicapable to discounts
+     * Sum price of articles applicable to discounts
      *
      * @var oxPrice
      */
     protected $_oDiscountProductsPriceList = null;
 
     /**
-     * Sum price of articles not applicapable to discounts
+     * Sum price of articles not applicable to discounts
      *
      * @var oxPrice
      */
@@ -148,7 +148,7 @@ class oxBasket extends oxSuperCfg
     protected $_blUpdateNeeded = true;
 
     /**
-     * oxbasket summary object, usually used for discount calcualtions etc
+     * oxBasket summary object, usually used for discount calculations etc
      *
      * @var array
      */
@@ -384,15 +384,15 @@ class oxBasket extends oxSuperCfg
     }
 
     /**
-     * Adds user item to basket. Returns oxbasketitem object if adding succeded
+     * Adds user item to basket. Returns oxBasketItem object if adding succeeded
      *
      * @param string $sProductID       id of product
      * @param double $dAmount          product amount
-     * @param array  $aSel             product select lists (default null)
-     * @param array  $aPersParam       product persistent parameters (default null)
-     * @param bool   $blOverride       marker to acumulate passed amount or renew (default false)
+     * @param mixed  $aSel             product select lists (default null)
+     * @param mixed  $aPersParam       product persistent parameters (default null)
+     * @param bool   $blOverride       marker to accumulate passed amount or renew (default false)
      * @param bool   $blBundle         marker if product is bundle or not (default false)
-     * @param string $sOldBasketItemId id if old basket item if to change it
+     * @param mixed $sOldBasketItemId id if old basket item if to change it
      *
      * @throws oxOutOfStockException oxArticleInputException, oxNoArticleException
      *
@@ -430,7 +430,7 @@ class oxBasket extends oxSuperCfg
         // after some checks item must be removed from basket
         $blRemoveItem = false;
 
-        // initialting exception storage
+        // initialling exception storage
         $oEx = null;
 
         if ( isset( $this->_aBasketContents[$sItemId] ) ) {
@@ -999,7 +999,7 @@ class oxBasket extends oxSuperCfg
 
  //P
     /**
-     * Performs final sum calculations and roundings.
+     * Performs final sum calculation and rounding.
      *
      * @return null
      *
@@ -1117,20 +1117,20 @@ class oxBasket extends oxSuperCfg
                                 }
                             }
 
-                            // applay discout to vat
+                            // apply discount to vat
                             foreach ( $this->_aDiscountedVats as $sKey => $dVat ) {
                                 $this->_aDiscountedVats[$sKey] = oxPrice::percent( $dVat, $dVatPart);
                             }
                         }
 
-                        // acumulating discount value
+                        // accumulating discount value
                         $this->_oVoucherDiscount->add( $dVoucherdiscount );
 
                         // collecting formatted for preview
                         $oStdVoucher->fVoucherdiscount = $oLang->formatCurrency( $dVoucherdiscount, $this->getBasketCurrency() );
                         $oStdVoucher->dVoucherdiscount = $dVoucherdiscount;
 
-                        // substracting voucher discount
+                        // subtracting voucher discount
                         $dPrice = $dPrice - $dVoucherdiscount;
 
 
@@ -1183,7 +1183,7 @@ class oxBasket extends oxSuperCfg
         }
     }
     /**
-     * Retruns true if view mode is netto
+     * Returns true if view mode is netto
      *
      * @return bool
      */
@@ -1263,21 +1263,21 @@ class oxBasket extends oxSuperCfg
 
             $dVatPart = 100 - $oDiscount->getPercentage( $dOldprice );
 
-            // if discoount is more than basket sum
+            // if discount is more than basket sum
             if ( $dOldprice < $oStdDiscount->dDiscount ) {
                 $oStdDiscount->dDiscount = $dOldprice;
                 $dVatPart = 0;
             }
 
-            // applay discout to vat
+            // apply discount to vat
             foreach ( $this->_aDiscountedVats as $sKey => $dVat ) {
                 $this->_aDiscountedVats[$sKey] = oxPrice::percent( $dVat, $dVatPart);
             }
 
-            //storring discount
+            //storing discount
             if ($oStdDiscount->dDiscount != 0) {
                 $this->_aDiscounts[$oDiscount->getId()] = $oStdDiscount;
-                // substracting product price after discount
+                // subtracting product price after discount
                 $dOldprice = $dOldprice - $oStdDiscount->dDiscount;
             }
         }
@@ -1500,7 +1500,7 @@ class oxBasket extends oxSuperCfg
         //  9.1: delivery
         $this->setCost( 'oxdelivery', $this->_calcDeliveryCost() );
 
-        //  9.2: adding wrapping and giftcard costs
+        //  9.2: adding wrapping and gift card costs
         $this->setCost( 'oxwrapping', $this->_calcBasketWrapping() );
 
         $this->setCost( 'oxgiftcard', $this->_calcBasketGiftCard() );
@@ -1514,7 +1514,7 @@ class oxBasket extends oxSuperCfg
         //  10. calculate total price
         $this->_calcTotalPrice();
 
-        //  11. formating discounts
+        //  11. formatting discounts
         $this->formatDiscount();
 
         //  12.setting to up-to-date status
@@ -1654,7 +1654,7 @@ class oxBasket extends oxSuperCfg
     }
 
     /**
-     * Removes voucher from basket and unreserves it.
+     * Removes voucher from basket and unreserved it.
      *
      * @param string $sVoucherId removable voucher ID
      *
@@ -1689,14 +1689,14 @@ class oxBasket extends oxSuperCfg
     }
 
     /**
-     * Formating discounts
+     * Formatting discounts
      *
      * @return null
      */
     protected function formatDiscount()
     {
         // discount information
-        // formating discount value
+        // formatting discount value
         $this->aDiscounts = $this->getDiscounts();
         if ( count($this->aDiscounts) > 0 ) {
             $oLang = oxRegistry::getLang();
@@ -2098,13 +2098,13 @@ class oxBasket extends oxSuperCfg
     }
 
     /**
-     * Returns array of palain of formatted VATs which were calculated for basket
+     * Returns array of plain of formatted VATs which were calculated for basket
      *
-     * @param bool $blFormatCurrency enambles currency formating
+     * @param bool $blFormatCurrency enables currency formatting
      *
      * @return array
      */
-    public function getProductVats( $blFormatCurrency = true)
+    public function getProductVats( $blFormatCurrency = true )
     {
         if ( !$this->_oNotDiscountedProductsPriceList ) {
             return array();
@@ -2306,6 +2306,8 @@ class oxBasket extends oxSuperCfg
     /**
      * Formatted Products net price getter
      *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
+     *
      * @return string
      */
     public function getProductsNetPrice()
@@ -2315,6 +2317,8 @@ class oxBasket extends oxSuperCfg
 
      /**
      * Formatted Products price getter
+     *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
      *
      * @return string
      */
@@ -2326,6 +2330,8 @@ class oxBasket extends oxSuperCfg
     /**
      * Returns VAT of delivery costs
      *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
+     *
      * @return double
      */
     public function getDelCostVatPercent()
@@ -2335,6 +2341,8 @@ class oxBasket extends oxSuperCfg
 
     /**
      * Returns formatted VAT of delivery costs
+     *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
      *
      * @return string | bool
      */
@@ -2351,6 +2359,8 @@ class oxBasket extends oxSuperCfg
 
     /**
      * Returns formatted netto price of delivery costs
+     *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
      *
      * @return string
      */
@@ -2371,6 +2381,8 @@ class oxBasket extends oxSuperCfg
     /**
      * Returns VAT of payment costs
      *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
+     *
      * @return double
      */
     public function getPayCostVatPercent()
@@ -2380,6 +2392,8 @@ class oxBasket extends oxSuperCfg
 
     /**
      * Returns formatted VAT of payment costs
+     *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
      *
      * @return string
      */
@@ -2396,6 +2410,8 @@ class oxBasket extends oxSuperCfg
 
     /**
      * Returns formatted netto price of payment costs
+     *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
      *
      * @return string
      */
@@ -2414,6 +2430,8 @@ class oxBasket extends oxSuperCfg
     /**
      * Returns payment costs brutto value
      *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
+     *
      * @return double | bool
      */
     public function getPaymentCosts()
@@ -2425,7 +2443,19 @@ class oxBasket extends oxSuperCfg
     }
 
     /**
+     * Returns payment costs
+     *
+     * @return oxPrice
+     */
+    public function getPaymentCost()
+    {
+        return $this->getCosts( 'oxpayment' );
+    }
+
+    /**
      * Returns if exists formatted payment costs
+     *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
      *
      * @return string | bool
      */
@@ -2452,7 +2482,9 @@ class oxBasket extends oxSuperCfg
     }
 
     /**
-     * Returns formated voucher discount
+     * Returns formatted voucher discount
+     *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
      *
      * @return string | bool
      */
@@ -2470,6 +2502,8 @@ class oxBasket extends oxSuperCfg
     /**
      * Returns VAT of wrapping costs
      *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
+     *
      * @return double
      */
     public function getWrappCostVatPercent()
@@ -2481,6 +2515,8 @@ class oxBasket extends oxSuperCfg
     /**
      * Returns VAT of gift card costs
      *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
+     *
      * @return double
      */
     public function getGiftCardCostVatPercent()
@@ -2490,6 +2526,8 @@ class oxBasket extends oxSuperCfg
 
     /**
      * Returns formatted VAT of wrapping costs
+     *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
      *
      * @return string | bool
      */
@@ -2510,6 +2548,8 @@ class oxBasket extends oxSuperCfg
     /**
      * Returns formatted netto price of wrapping costs
      *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
+     *
      * @return string
      */
     public function getWrappCostNet()
@@ -2529,6 +2569,8 @@ class oxBasket extends oxSuperCfg
     /**
      * Returns if exists formatted wrapping costs
      *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
+     *
      * @return string | bool
      */
     public function getFWrappingCosts()
@@ -2542,9 +2584,15 @@ class oxBasket extends oxSuperCfg
         return false;
     }
 
+    public function getWrappingCost()
+    {
+        return $this->getCosts( 'oxwrapping' );
+    }
 
     /**
      * Returns formatted VAT of gift card costs
+     *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
      *
      * @return string | bool
      */
@@ -2566,6 +2614,8 @@ class oxBasket extends oxSuperCfg
     /**
      * Returns formatted netto price of gift card costs
      *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
+     *
      * @return string
      */
     public function getGiftCardCostNet()
@@ -2585,6 +2635,8 @@ class oxBasket extends oxSuperCfg
     /**
      * Returns if exists formatted gift card costs
      *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
+     *
      * @return string | bool
      */
     public function getFGiftCardCosts()
@@ -2598,7 +2650,17 @@ class oxBasket extends oxSuperCfg
     }
 
     /**
+     * @return oxPrice
+     */
+    public function getGiftCardCost()
+    {
+        return $this->getCosts( 'oxgiftcard' );
+    }
+
+    /**
      * Returns formatted basket total price
+     *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
      *
      * @return string
      */
@@ -2609,6 +2671,8 @@ class oxBasket extends oxSuperCfg
 
     /**
      * Returns if exists formatted delivery costs
+     *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
      *
      * @return string | bool
      */
@@ -2625,6 +2689,8 @@ class oxBasket extends oxSuperCfg
     /**
      * Returns if exists delivery costs
      *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
+     *
      * @return string | bool
      */
     public function getDeliveryCosts()
@@ -2633,6 +2699,16 @@ class oxBasket extends oxSuperCfg
             return $oDeliveryCost->getBruttoPrice();
         }
         return false;
+    }
+
+    /**
+     * Returns delivery costs
+     *
+     * @return oxPrice
+     */
+    public function getDeliveryCost()
+    {
+        return $this->getCosts( 'oxdelivery' );
     }
 
     /**
@@ -2904,6 +2980,8 @@ class oxBasket extends oxSuperCfg
     /**
      * Returns if exists formatted TS protection costs
      *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
+     *
      * @return string | bool
      */
     public function getFTsProtectionCosts()
@@ -2918,6 +2996,8 @@ class oxBasket extends oxSuperCfg
     /**
      * Returns VAT of TS protection costs
      *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
+     *
      * @return string | bool
      */
     public function getTsProtectionVatPercent()
@@ -2927,6 +3007,8 @@ class oxBasket extends oxSuperCfg
 
     /**
      * Returns formatted VAT of TS protection costs
+     *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
      *
      * @return string
      */
@@ -2943,6 +3025,8 @@ class oxBasket extends oxSuperCfg
     /**
      * Returns formatted netto price of TS protection costs
      *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
+     *
      * @return string
      */
     public function getTsProtectionNet()
@@ -2957,6 +3041,8 @@ class oxBasket extends oxSuperCfg
     /**
      * Returns TS protection costs brutto value
      *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
+     *
      * @return double
      */
     public function getTsProtectionCosts()
@@ -2969,9 +3055,20 @@ class oxBasket extends oxSuperCfg
     }
 
     /**
+     * Returns TS protection costs brutto value
+     *
+     * @return double in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
+     */
+    public function getTrustedShopProtectionCost()
+    {
+        return $this->getCosts( 'oxtsprotection' );
+    }
+
+
+    /**
      * Returns pricelist object of not discounted products
      *
-     * @return oxprice
+     * @return oxprice in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
      */
     public function getNotDiscountProductsPrice()
     {
@@ -3040,6 +3137,16 @@ class oxBasket extends oxSuperCfg
         }
 
         return $this->_blDownloadableProducts;
+    }
+
+    /**
+     * Returns min order price value
+     *
+     * @return decimal
+     */
+    public function getMinOrderPrice()
+    {
+        return oxPrice::getPriceInActCurrency( $this->getConfig()->getConfigParam( 'iMinOrderPrice' ) );
     }
 
 }

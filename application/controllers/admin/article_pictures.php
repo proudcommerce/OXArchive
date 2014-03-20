@@ -135,7 +135,6 @@ class Article_Pictures extends oxAdminDetails
             if ( $iIndex > 0 ) {
                 // deleting master picture
                 $this->_resetMasterPicture( $oArticle, $iIndex, true );
-                $oArticle->oxarticles__oxpicsgenerated = new oxField( 0 );
             }
         }
 

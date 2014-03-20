@@ -22,8 +22,8 @@
  */
 
 /**
- * Article list manager.
- * Collects list of article according to collection rules (categories, etc.).
+ * Country list manager class.
+ * Collects a list of countries according to collection rules (active).
  *
  * @package model
  */
@@ -46,7 +46,7 @@ class oxCountryList extends oxList
      *
      * @param integer $iLang language
      *
-     * @return null;
+     * @return null
      */
     public function loadActiveCountries( $iLang = null )
     {

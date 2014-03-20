@@ -9,20 +9,17 @@
 [{/if}]
 
 [{if $tsId }]
-    <div id="tsSeal">
-        <a id="tsCertificate" class="js-external" href="https://www.trustedshops.com/shop/certificate.php?shop_id=[{$tsId}]">
-            <img src="[{$oViewConf->getImageUrl('trustedshops_m.gif')}]" title="[{ oxmultilang ident="WIDGET_TRUSTEDSHOPS_ITEM_IMGTITLE" }]">
+    [{oxscript include='js/widgets/oxtsbadge.js'}]
+    [{oxscript add="$( 'body' ).oxTsBadge({trustedShopId:'`$tsId`'});"}]
+    <noscript>
+        <a href="https://www.trustedshops.co.uk/shop/certificate.php?shop_id=[{$tsId}]">
+            <img title="Trusted Shops Seal of Approval - click to verify." src="//widgets.trustedshops.com/images/badge.png" style="position:fixed;bottom:100;right:100;" />
         </a>
-    </div>
-    <div id="tsText">
-        <a id="tsProfile" class="js-external" title="[{ oxmultilang ident="WIDGET_TRUSTEDSHOPS_ITEM_ALTTEXT" }]" href="[{ oxmultilang ident="WIDGET_TRUSTEDSHOPS_ITEM_PROFILELINK" }][{$tsId}].html">
-            [{$oxcmp_shop->oxshops__oxname->value}] [{ oxmultilang ident="WIDGET_TRUSTEDSHOPS_ITEM_SEALOFAPPROVAL" }]
-        </a>
-    </div>
+    </noscript>
 [{else}]
-    <a id="tsMembership" class="js-external" href="[{ oxmultilang ident="WIDGET_TRUSTEDSHOPS_ITEM_LINK" }]">
+    <a id="tsMembership" class="js-external" href="[{ oxmultilang ident="TRUSTED_SHOPS_LINK" }]">
         [{assign var="sTrustShopImg" value="trustedshops_"|cat:$oViewConf->getActLanguageAbbr()|cat:".gif" }]
-        <img src="[{$oViewConf->getImageUrl($sTrustShopImg)}]" alt="[{ oxmultilang ident="WIDGET_TRUSTEDSHOPS_ITEM_ALTTEXT" }]">
+        <img src="[{$oViewConf->getImageUrl($sTrustShopImg)}]" alt="[{ oxmultilang ident="MORE" }]">
     </a>
 [{/if}]
 <!-- / Trusted Shops Siegel -->

@@ -31,7 +31,35 @@ class oxwBetaNote extends oxWidget
 
     /**
      * Current class template name.
+     *
      * @var string
      */
     protected $_sThisTemplate = 'widget/header/betanote.tpl';
+
+    /**
+     * Beta Note link value. Has default value
+     *
+     * @var string
+     */
+    protected $_sBetaNoteLink = 'http://wiki.oxidforge.org/Development/Beta';
+
+    /**
+     * Gets beta note link
+     *
+     * @return string
+     */
+    public function getBetaNoteLink()
+    {
+        return $this->_sBetaNoteLink;
+    }
+
+    /**
+     * Sets beta note link
+     *
+     * @param $sLink string link to set
+     */
+    public function setBetaNoteLink( $sLink )
+    {
+        $this->_sBetaNoteLink = $sLink;
+    }
 }

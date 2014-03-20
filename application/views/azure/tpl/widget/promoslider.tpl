@@ -16,19 +16,27 @@
             <a href="[{ $sBannerLink }]">
             [{/if}]
             [{if $oArticle }]
-            <span class="promoBox">
-                <strong class="promoPrice">[{ $oArticle->getFPrice() }] [{ $currency->sign}]</strong>
-                <strong class="promoTitle">[{ $oArticle->oxarticles__oxtitle->value }]</strong>
-            </span>
-            [{/if }]
+                [{assign var="sFrom" value=""}]
+                [{assign var="oPrice" value=$oArticle->getPrice()}]
+                [{if $oArticle->isParentNotBuyable() }]
+                    [{assign var="oPrice" value=$oArticle->getVarMinPrice()}]
+                    [{if $oArticle->isRangePrice() }]
+                        [{assign var="sFrom" value="PRICE_FROM"|oxmultilangassign}]
+                    [{/if}]
+                [{/if}]
+                <span class="promoBox [{if $sFrom }]wide[{/if}]">
+                    <strong class="promoPrice [{if $sFrom }]wide[{/if}]">[{$sFrom}] [{oxprice price=$oPrice currency=$currency }]</strong>
+                    <strong class="promoTitle [{if $sFrom }]wide[{/if}]">[{ $oArticle->oxarticles__oxtitle->value }]</strong>
+                </span>
+            [{/if}]
             [{assign var=sBannerPictureUrl value=$oBanner->getBannerPictureUrl() }]
             [{if $sBannerPictureUrl }]
-            <img src="[{ $sBannerPictureUrl }]" height="220" width="940" alt="[{$oBanner->oxactions__oxtitle->value}]">
-            [{/if }]
+            <img src="[{ $sBannerPictureUrl }]" alt="[{$oBanner->oxactions__oxtitle->value}]">
+            [{/if}]
             [{if $sBannerLink }]
             </a>
             [{/if}]
         </li>
-        [{/foreach }]
+        [{/foreach}]
     </ul>
-[{/if }]
+[{/if}]

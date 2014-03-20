@@ -31,13 +31,6 @@
 class Details extends oxUBase
 {
     /**
-     * List of article variants.
-     *
-     * @var array
-     */
-    protected $_aVariantList = null;
-
-    /**
      * Current class default template name.
      *
      * @var string
@@ -47,22 +40,9 @@ class Details extends oxUBase
     /**
      * Current product parent article object
      *
-     * @var oxarticle
+     * @var oxArticle
      */
     protected $_oParentProd = null;
-
-    /**
-     * Marker if user can rate current product
-     *
-     * @var bool
-     */
-    protected $_blCanRate = null;
-
-    /**
-     * Marked which defines if current view is sortable or not
-     * @var bool
-     */
-    protected $_blShowSorting = true;
 
     /**
      * If tags will be changed
@@ -71,64 +51,16 @@ class Details extends oxUBase
     protected $_blEditTags = null;
 
     /**
-     * If tags can be changed
-     * @var bool
-     */
-    protected $_blCanEditTags = null;
-
-    /**
      * All tags
      * @var array
      */
     protected $_aTags = null;
 
     /**
-     * Returns user recommendation list
-     * @var array
-     */
-    protected $_aUserRecommList = null;
-
-    /**
      * Class handling CAPTCHA image.
      * @var object
      */
     protected $_oCaptcha = null;
-
-    /**
-     * Media files
-     * @var array
-     */
-    protected $_aMediaFiles = null;
-
-    /**
-     * History (last seen) products
-     * @var array
-     */
-    protected $_aLastProducts = null;
-
-    /**
-     * Current product's vendor
-     * @var oxVendor
-     */
-    protected $_oVendor = null;
-
-    /**
-     * Current product's manufacturer
-     * @var oxManufacturer
-     */
-    protected $_oManufacturer = null;
-
-    /**
-     * Current product's category
-     * @var object
-     */
-    protected $_oCategory = null;
-
-    /**
-     * Current product's attributes
-     * @var object
-     */
-    protected $_aAttributes = null;
 
     /**
      * Parent article name
@@ -173,19 +105,13 @@ class Details extends oxUBase
     protected $_oSimilarProducts = null;
 
     /**
-     * Similar recommendation lists
-     * @var object
-     */
-    protected $_oRecommList = null;
-
-    /**
      * Accessories of current article
      * @var object
      */
     protected $_oAccessoires = null;
 
     /**
-     * List of customer also bought thies products
+     * List of customer also bought these products
      * @var object
      */
     protected $_aAlsoBoughtArts = null;
@@ -209,25 +135,6 @@ class Details extends oxUBase
      * @var int
      */
     protected $_iLinkType = null;
-
-    /**
-     * Is multi dimension variant view
-     *
-     * @var bool
-     */
-    protected $_blMdView = null;
-
-    /**
-     * Rating value
-     * @var double
-     */
-    protected $_dRatingValue = null;
-
-    /**
-     * Ratng count
-     * @var integer
-     */
-    protected $_iRatingCnt = null;
 
     /**
      * Bid price.
@@ -256,6 +163,12 @@ class Details extends oxUBase
 
 
     /**
+     * Marked which defines if current view is sortable or not
+     * @var bool
+     */
+    protected $_blShowSorting = true;
+
+    /**
      * Returns current product parent article object if it is available
      *
      * @param string $sParentId parent product id
@@ -276,46 +189,6 @@ class Details extends oxUBase
     }
 
     /**
-     * loading full list of variants,
-     * if we are child and do not have any variants then let's load all parent variants as ours
-     *
-     * @return null
-     */
-    public function loadVariantInformation()
-    {
-        if ( $this->_aVariantList === null ) {
-            $oProduct = $this->getProduct();
-
-            //if we are child and do not have any variants then let's load all parent variants as ours
-            if ( $oParent = $oProduct->getParentArticle() ) {
-                $myConfig = $this->getConfig();
-
-                $oParent->setNoVariantLoading(false);
-                $this->_aVariantList = $oParent->getFullVariants( false );
-
-                //lets additionally add parent article if it is sellable
-                if ( count( $this->_aVariantList ) && $myConfig->getConfigParam( 'blVariantParentBuyable' ) ) {
-                    //#1104S if parent is buyable load selectlists too
-                    $oParent->enablePriceLoad();
-                    $oParent->aSelectlist = $oParent->getSelectLists();
-                    $this->_aVariantList = array_merge( array( $oParent ), $this->_aVariantList->getArray() );
-                }
-            } else {
-                //loading full list of variants
-                $this->_aVariantList = $oProduct->getFullVariants( false );
-            }
-
-            // setting link type for variants ..
-            foreach ( $this->_aVariantList as $oVariant ) {
-                $this->_processProduct( $oVariant );
-            }
-
-        }
-
-        return $this->_aVariantList;
-    }
-
-    /**
      * In case list type is "search" returns search parameters which will be added to product details link
      *
      * @return string | null
@@ -326,6 +199,39 @@ class Details extends oxUBase
             return $this->getDynUrlParams();
         }
     }
+
+    /**
+     * Returns array of params => values which are used in hidden forms and as additional url params.
+     * NOTICE: this method SHOULD return raw (non encoded into entities) parameters, because values
+     * are processed by htmlentities() to avoid security and broken templates problems
+     * This exact fix is added for article details to parse variant selection properly for widgets.
+     *
+     * @return array
+     */
+    public function getNavigationParams()
+    {
+        $aParams = parent::getNavigationParams();
+
+        $aVarselParams = oxRegistry::getConfig()->getRequestParameter( 'varselid' );
+        $aSelectListParams = oxRegistry::getConfig()->getRequestParameter( 'sel' );
+        if ( !$aVarselParams && !$aSelectListParams ) {
+            return $aParams;
+        }
+
+        if ( $aVarselParams ) {
+            foreach ( $aVarselParams as $iKey => $sValue ) {
+                $aParams["varselid[$iKey]"] = $sValue;
+            }
+        }
+
+        if ( $aSelectListParams ) {
+            foreach ( $aSelectListParams as $iKey => $sValue ) {
+                $aParams["sel[$iKey]"] = $sValue;
+            }
+        }
+        return $aParams;
+    }
+
 
     /**
      * Processes product by setting link type and in case list type is search adds search parameters to details link
@@ -399,8 +305,8 @@ class Details extends oxUBase
                 return 'page/details/ajax/productmain.tpl';
                 break;
             default:
-                // #785A loads and sets locator data
-                $oLocator = oxNew( 'oxlocator', $this->getListType() );
+                // can not be removed, as it is used for breadcrumb loading
+                $oLocator = oxNew( 'oxLocator', $this->getListType() );
                 $oLocator->setLocatorData( $oProduct, $this );
 
                 if ($myConfig->getConfigParam( 'bl_rssRecommLists' ) && $this->getSimilarRecommListIds()) {
@@ -472,51 +378,6 @@ class Details extends oxUBase
         }
 
         return $sKeywords;
-    }
-
-    /**
-     * Checks if rating functionality is active
-     *
-     * @return bool
-     */
-    public function ratingIsActive()
-    {
-        return $this->getConfig()->getConfigParam( 'bl_perfLoadReviews' );
-    }
-
-    /**
-     * Checks if rating functionality is on and allowed to user
-     *
-     * @return bool
-     */
-    public function canRate()
-    {
-        if ( $this->_blCanRate === null ) {
-
-            $this->_blCanRate = false;
-
-            if ( $this->ratingIsActive() && $oUser = $this->getUser() ) {
-
-                $oRating = oxNew( 'oxrating' );
-                $this->_blCanRate = $oRating->allowRating( $oUser->getId(), 'oxarticle', $this->getProduct()->getId() );
-            }
-        }
-
-        return $this->_blCanRate;
-    }
-
-    /**
-     * Checks if rating functionality is on and allowed to user
-     *
-     * @return bool
-     */
-    public function canChangeTags()
-    {
-        if ( $oUser = $this->getUser() ) {
-
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -606,26 +467,52 @@ class Details extends oxUBase
         $oArticleTagList = oxNew( "oxarticletaglist" );
         $oArticleTagList->load( $oProduct->getId() );
         $sSeparator = $oArticleTagList->get()->getSeparator();
-        $aTags = explode( $sSeparator, $sTags );
-        $blAddedTag = false;
-        foreach ( $aTags as $sTag ) {
-            $oTag = oxNew( "oxtag" );
-            $oTag->set( $sTag );
-            if ( $aAddedTags[$oTag->get()] != 1 ) {
-                $oArticleTagList->addTag( $oTag );
-                $aAddedTags[$oTag->get()] = 1;
-                $blAddedTag = true;
-            }
-        }
-        if ( $blAddedTag ) {
+        $aTags = array_unique( explode( $sSeparator, $sTags ) );
+
+        $aResult = $this->_addTagsToList( $oArticleTagList, $aTags, $aAddedTags);
+
+        if ( !empty( $aResult['tags'] ) ) {
             $oArticleTagList->save();
+            foreach ( $aResult['tags'] as $sTag) {
+                $aAddedTags[ $sTag ] = 1;
+            }
             $aTaggedProducts[$oProduct->getId()] = $aAddedTags;
             oxRegistry::getSession()->setVariable( 'aTaggedProducts', $aTaggedProducts);
         }
         // for ajax call
         if ( $this->getConfig()->getRequestParameter( 'blAjax', true ) ) {
-            oxRegistry::getUtils()->showMessageAndExit( $blAddedTag );
+            oxRegistry::getUtils()->showMessageAndExit( json_encode( $aResult ) );
         }
+    }
+
+    /**
+     * Adds tags to passed oxArticleTagList object
+     *
+     * @param oxArticleTagList $oArticleTagList article tags list object
+     * @param array            $aTags           tags array to add to list
+     * @param array            $aAddedTags      tags, which are already added to list
+     *
+     * @return array
+     */
+    protected function _addTagsToList( $oArticleTagList, $aTags, $aAddedTags)
+    {
+        $aResult = array( 'tags' => array(), 'invalid' => array(), 'inlist' => array() );
+
+        foreach ( $aTags as $sTag ) {
+            $oTag = oxNew( "oxtag", $sTag );
+            if ( $aAddedTags[$oTag->get()] != 1 ) {
+                if ( $oTag->isValid() ) {
+                    $oArticleTagList->addTag( $oTag );
+                    $aResult['tags'][] = $oTag->get();
+                } else {
+                    $aResult['invalid'][] = $oTag->get();
+                }
+            } else {
+                $aResult['inlist'][] = $oTag->get();
+            }
+        }
+
+        return $aResult;
     }
 
     /**
@@ -692,32 +579,6 @@ class Details extends oxUBase
     }
 
     /**
-     * loading full list of attributes
-     *
-     * @return array $_aAttributes
-     */
-    public function getAttributes()
-    {
-        if ( $this->_aAttributes === null ) {
-            // all attributes this article has
-            $aArtAttributes = $this->getProduct()->getAttributes();
-
-            //making a new array for backward compatibility
-            $this->_aAttributes = false;
-
-            if ( count( $aArtAttributes ) ) {
-                foreach ( $aArtAttributes as $sKey => $oAttribute ) {
-                    $this->_aAttributes[$sKey] = new stdClass();
-                    $this->_aAttributes[$sKey]->title = $oAttribute->oxattribute__oxtitle->value;
-                    $this->_aAttributes[$sKey]->value = $oAttribute->oxattribute__oxvalue->value;
-                }
-            }
-        }
-        return $this->_aAttributes;
-    }
-
-
-    /**
      * Returns if tags will be edit
      *
      * @return bool
@@ -738,39 +599,9 @@ class Details extends oxUBase
     }
 
     /**
-     * Returns tag cloud manager class
-     *
-     * @return oxTagCloud
-     */
-    public function getTagCloudManager()
-    {
-        $oManager = oxNew( "oxTagCloud" );
-        $oManager->setExtendedMode( true );
-        $oManager->setProductId( $this->getProduct()->getId() );
-        return $oManager;
-    }
-
-    /**
-     * Returns if tags can be changed, if user is loggen in and
-     * product exists.
-     *
-     * @return bool
-     */
-    public function isEditableTags()
-    {
-        if ( $this->_blCanEditTags === null ) {
-            $this->_blCanEditTags = false;
-            if ( $this->getProduct() && $this->getUser()) {
-                $this->_blCanEditTags = true;
-            }
-        }
-        return $this->_blCanEditTags;
-    }
-
-    /**
      * Returns current product
      *
-     * @return oxarticle
+     * @return oxArticle
      */
     public function getProduct()
     {
@@ -855,123 +686,6 @@ class Details extends oxUBase
     }
 
     /**
-     * Returns variant lists of current product
-     *
-     * @return array
-     */
-    public function getVariantList()
-    {
-        return $this->loadVariantInformation();
-    }
-
-    /**
-     * Returns variant lists of current product
-     * excludes currently viewed product
-     *
-     * @return array
-     */
-    public function getVariantListExceptCurrent()
-    {
-        $oList = $this->getVariantList();
-        if (is_object($oList)) {
-            $oList = clone $oList;
-        }
-
-        $sOxid = $this->getProduct()->getId();
-        if (isset($oList[$sOxid])) {
-            unset($oList[$sOxid]);
-        }
-        return $oList;
-    }
-
-    /**
-     * Template variable getter. Returns object of handling CAPTCHA image
-     *
-     * @return object
-     */
-    public function getCaptcha()
-    {
-        if ( $this->_oCaptcha === null ) {
-            $this->_oCaptcha = oxNew('oxCaptcha');
-        }
-        return $this->_oCaptcha;
-    }
-
-    /**
-     * Template variable getter. Returns media files of current product
-     *
-     * @return array
-     */
-    public function getMediaFiles()
-    {
-        if ( $this->_aMediaFiles === null ) {
-            $aMediaFiles = $this->getProduct()->getMediaUrls();
-            $this->_aMediaFiles = count($aMediaFiles) ? $aMediaFiles : false;
-        }
-        return $this->_aMediaFiles;
-    }
-
-    /**
-     * Template variable getter. Returns last seen products
-     *
-     * @param int $iCnt product count
-     *
-     * @return array
-     */
-    public function getLastProducts( $iCnt = 4 )
-    {
-        if ( $this->_aLastProducts === null ) {
-            //last seen products for #768CA
-            $oProduct = $this->getProduct();
-            $sArtId = $oProduct->oxarticles__oxparentid->value?$oProduct->oxarticles__oxparentid->value:$oProduct->getId();
-
-            $oHistoryArtList = oxNew( 'oxarticlelist' );
-            $oHistoryArtList->loadHistoryArticles( $sArtId, $iCnt );
-            $this->_aLastProducts = $oHistoryArtList;
-        }
-        return $this->_aLastProducts;
-    }
-
-    /**
-     * Template variable getter. Returns product's vendor
-     *
-     * @return object
-     */
-    public function getVendor()
-    {
-        if ( $this->_oVendor === null ) {
-            $this->_oVendor = $this->getProduct()->getVendor( false );
-        }
-        return $this->_oVendor;
-    }
-
-    /**
-     * Template variable getter. Returns product's vendor
-     *
-     * @return object
-     */
-    public function getManufacturer()
-    {
-        if ( $this->_oManufacturer === null ) {
-            $this->_oManufacturer = $this->getProduct()->getManufacturer( false );
-        }
-        return $this->_oManufacturer;
-    }
-
-    /**
-     * Template variable getter. Returns product's root category
-     *
-     * @return object
-     */
-    public function getCategory()
-    {
-        if ( $this->_oCategory === null ) {
-            $this->_oCategory = $this->getProduct()->getCategory();
-        }
-        return $this->_oCategory;
-    }
-
-    /**
      * Template variable getter. Returns if draw parent url
      *
      * @return bool
@@ -983,6 +697,8 @@ class Details extends oxUBase
 
     /**
      * Template variable getter. Returns parent article name
+     *
+     * @deprecated since v5.1.0 (2013-08-06); not used code anymore
      *
      * @return string
      */
@@ -999,6 +715,8 @@ class Details extends oxUBase
 
     /**
      * Template variable getter. Returns parent article name
+     *
+     * @deprecated since v5.1.0 (2013-08-06); not used code anymore
      *
      * @return string
      */
@@ -1050,17 +768,6 @@ class Details extends oxUBase
     }
 
     /**
-     * Template variable getter. Returns true if there more pictures
-     *
-     * @return bool
-     */
-    public function morePics()
-    {
-        $aPicGallery = $this->getPictureGallery();
-        return $aPicGallery['MorePics'];
-    }
-
-    /**
      * Template variable getter. Returns pictures of current article
      *
      * @return array
@@ -1082,49 +789,6 @@ class Details extends oxUBase
     {
         $aPicGallery = $this->getPictureGallery();
         return $aPicGallery['Pics'][$sPicNr];
-    }
-
-    /**
-     * Template variable getter. Returns icons of current article
-     *
-     * @return array
-     */
-    public function getIcons()
-    {
-        $aPicGallery = $this->getPictureGallery();
-        return $aPicGallery['Icons'];
-    }
-
-    /**
-     * Template variable getter. Returns if to show zoom pictures
-     *
-     * @return bool
-     */
-    public function showZoomPics()
-    {
-        $aPicGallery = $this->getPictureGallery();
-        return $aPicGallery['ZoomPic'];
-    }
-
-    /**
-     * Template variable getter. Returns zoom pictures
-     *
-     * @return array
-     */
-    public function getZoomPics()
-    {
-        $aPicGallery = $this->getPictureGallery();
-        return $aPicGallery['ZoomPics'];
-    }
-
-    /**
-     * Template variable getter. Returns active zoom picture id
-     *
-     * @return array
-     */
-    public function getActZoomPic()
-    {
-        return 1;
     }
 
     /**
@@ -1160,7 +824,7 @@ class Details extends oxUBase
     }
 
     /**
-     * Template variable getter. Returns crosssellings
+     * Template variable getter. Returns cross selling
      *
      * @return object
      */
@@ -1269,7 +933,7 @@ class Details extends oxUBase
     }
 
     /**
-     * Returns search title. It will be setted in oxLocator
+     * Returns search title. It will be set in oxLocator
      *
      * @return string
      */
@@ -1325,10 +989,26 @@ class Details extends oxUBase
     public function getTitle()
     {
         if ( $oProduct = $this->getProduct() ) {
-            return $oProduct->oxarticles__oxtitle->value . ( $oProduct->oxarticles__oxvarselect->value ? ' ' . $oProduct->oxarticles__oxvarselect->value : '' );
+            $sTag = $this->getTag();
+            return $oProduct->oxarticles__oxtitle->value . ( $oProduct->oxarticles__oxvarselect->value ? ' ' . $oProduct->oxarticles__oxvarselect->value : '' ) . (!empty($sTag) ? ' - '.$sTag : '');
         }
     }
+    
+    /**
+     * Template variable getter. Returns meta description
+     *
+     * @return string
+     */
+    public function getMetaDescription()
+    {
+        $sMeta = parent::getMetaDescription();
 
+        if($sTag = $this->getTag()) {
+            $sMeta = $sTag.' - ' . $sMeta;
+        }
+
+        return $sMeta;
+    }
 
     /**
      * Template variable getter. Returns current tag
@@ -1363,90 +1043,6 @@ class Details extends oxUBase
     }
 
     /**
-     * Should we show MD variant selection? - Not for 1 dimension variants.
-     *
-     * @return bool
-     */
-    public function isMdVariantView()
-    {
-        if ( $this->_blMdView === null ) {
-            $this->_blMdView = false;
-            if ( $this->getConfig()->getConfigParam( 'blUseMultidimensionVariants' ) ) {
-                $iMaxMdDepth = $this->getProduct()->getMdVariants()->getMaxDepth();
-                $this->_blMdView = ($iMaxMdDepth > 1);
-            }
-        }
-
-        return $this->_blMdView;
-    }
-
-    /**
-     * Checks should persistent parameter input field be displayed
-     *
-     * @return bool
-     */
-    public function isPersParam()
-    {
-        $oProduct = $this->getProduct();
-        return $oProduct->oxarticles__oxisconfigurable->value;
-    }
-
-    /**
-     * Returns tag separator
-     *
-     * @return string
-     */
-    public function getTagSeparator()
-    {
-        $sSepartor = $this->getConfig()->getConfigParam("sTagSeparator");
-        return $sSepartor;
-    }
-
-    /**
-     * Template variable getter. Returns rating value
-     *
-     * @return double
-     */
-    public function getRatingValue()
-    {
-
-        if ( $this->_dRatingValue === null ) {
-            $this->_dRatingValue = (double) 0;
-            if ( $this->isReviewActive() && ( $oDetailsProduct = $this->getProduct() ) ) {
-                $this->_dRatingValue = round( $oDetailsProduct->getArticleRatingAverage( $this->getConfig()->getConfigParam( 'blShowVariantReviews' ) ), 1);
-            }
-        }
-
-        return (double) $this->_dRatingValue;
-    }
-
-    /**
-     * Template variable getter. Returns if review module is on
-     *
-     * @return bool
-     */
-    public function isReviewActive()
-    {
-        return $this->getConfig()->getConfigParam( 'bl_perfLoadReviews' );
-    }
-
-    /**
-     * Template variable getter. Returns rating count
-     *
-     * @return integer
-     */
-    public function getRatingCount()
-    {
-        if ( $this->_iRatingCnt === null ) {
-            $this->_iRatingCnt = false;
-            if ( $this->isReviewActive() && ( $oDetailsProduct = $this->getProduct() ) ) {
-                $this->_iRatingCnt = $oDetailsProduct->getArticleRatingCount( $this->getConfig()->getConfigParam( 'blShowVariantReviews' ) );
-            }
-        }
-        return $this->_iRatingCnt;
-    }
-
-    /**
      * Returns Bread Crumb - you are here page1/page2/page3...
      *
      * @return array
@@ -1454,17 +1050,18 @@ class Details extends oxUBase
     public function getBreadCrumb()
     {
         $aPaths = array();
+        $oConfig = $this->getConfig();
 
-        if ( 'search' == oxConfig::getParameter( 'listtype' ) ) {
+        if ( 'search' == $oConfig->getRequestParameter( 'listtype' ) ) {
             $sSearchParam = $this->getSearchParamForHtml();
 
             $aCatPath = array();
-            $aCatPath['title'] = sprintf( oxRegistry::getLang()->translateString( 'searchResult', oxRegistry::getLang()->getBaseLanguage(), false ), $sSearchParam );
+            $aCatPath['title'] = sprintf( oxRegistry::getLang()->translateString( 'SEARCH_RESULT', oxRegistry::getLang()->getBaseLanguage(), false ), $sSearchParam );
             $aCatPath['link']  = $this->getViewConfig()->getSelfLink() . 'stoken=' . oxSession::getVar('sess_stoken') . "&amp;cl=search&amp;searchparam=" . $sSearchParam;
 
             $aPaths[] = $aCatPath;
 
-        } elseif ( 'tag' == oxConfig::getParameter( 'listtype' ) ) {
+        } elseif ( 'tag' == $oConfig->getRequestParameter( 'listtype' ) ) {
 
             $aCatPath = array();
 
@@ -1473,14 +1070,14 @@ class Details extends oxUBase
             $aPaths[] = $aCatPath;
 
             $oStr = getStr();
-            $aCatPath['title'] = $oStr->ucfirst(oxConfig::getParameter( 'searchtag' ));
-            $aCatPath['link']  = oxRegistry::get("oxSeoEncoderTag")->getTagUrl( oxConfig::getParameter( 'searchtag' ) );
+            $aCatPath['title'] = $oStr->ucfirst($oConfig->getRequestParameter( 'searchtag' ));
+            $aCatPath['link']  = oxRegistry::get("oxSeoEncoderTag")->getTagUrl( $oConfig->getRequestParameter( 'searchtag' ) );
             $aPaths[] = $aCatPath;
 
-        } elseif ( 'recommlist' == oxConfig::getParameter( 'listtype' ) ) {
+        } elseif ( 'recommlist' == $oConfig->getRequestParameter( 'listtype' ) ) {
 
             $aCatPath = array();
-            $aCatPath['title'] = oxRegistry::getLang()->translateString( 'PAGE_RECOMMENDATIONS_PRODUCTS_TITLE', oxRegistry::getLang()->getBaseLanguage(), false );
+            $aCatPath['title'] = oxRegistry::getLang()->translateString( 'LISTMANIA', oxRegistry::getLang()->getBaseLanguage(), false );
             $aPaths[] = $aCatPath;
         } else {
 
@@ -1500,6 +1097,19 @@ class Details extends oxUBase
         }
 
         return $aPaths;
+    }
+
+    /**
+     * Template variable getter. Returns object of handling CAPTCHA image
+     *
+     * @return object
+     */
+    public function getCaptcha()
+    {
+        if ( $this->_oCaptcha === null ) {
+            $this->_oCaptcha = oxNew('oxCaptcha');
+        }
+        return $this->_oCaptcha;
     }
 
     /**
@@ -1813,4 +1423,87 @@ class Details extends oxUBase
         return $this->getConfig()->getConfigParam("blShowRDFaProductStock");
     }
 
+    /**
+     * Checks if rating functionality is on and allowed to user
+     *
+     * @return bool
+     */
+    public function canChangeTags()
+    {
+        if ( $oUser = $this->getUser() ) {
+
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Returns tag cloud manager class
+     *
+     * @return oxTagCloud
+     */
+    public function getTagCloudManager()
+    {
+        $oManager = oxNew( "oxTagCloud" );
+        $oManager->setExtendedMode( true );
+        $oManager->setProductId( $this->getProduct()->getId() );
+        return $oManager;
+    }
+
+    /**
+     * Template variable getter. Returns if to show zoom pictures
+     *
+     * @return bool
+     */
+    public function showZoomPics()
+    {
+        $aPicGallery = $this->getPictureGallery();
+        return $aPicGallery['ZoomPic'];
+    }
+
+    /**
+     * Template variable getter. Returns if review module is on
+     *
+     * @return bool
+     */
+    public function isReviewActive()
+    {
+        return $this->getConfig()->getConfigParam( 'bl_perfLoadReviews' );
+    }
+
+    /**
+     * Returns default category sorting for selected category
+     *
+     * @return array
+     */
+    public function getDefaultSorting()
+    {
+        $aSorting = parent::getDefaultSorting();
+        $oCategory = $this->getActiveCategory();
+
+        if ( $this->getListType() != 'search' &&  $oCategory && $oCategory instanceof oxCategory ) {
+            if ( $sDefaultSorting = $oCategory->getDefaultSorting() ) {
+                $sArticleTable = getViewName( 'oxarticles' );
+                $sSortBy  = $sArticleTable.'.'.$sDefaultSorting;
+                $sSortDir = ( $oCategory->getDefaultSortingMode() ) ? "desc" : "asc";
+                $aSorting = array ( 'sortby' => $sSortBy, 'sortdir' => $sSortDir );
+            }
+        }
+
+        return $aSorting;
+    }
+
+    /**
+     * Returns sorting parameters separated by "|"
+     *
+     * @return string
+     */
+    public function getSortingParameters()
+    {
+        $aSorting = $this->getSorting( $this->getSortIdent() );
+        if ( !is_array( $aSorting ) ) {
+            return null;
+        }
+        return implode( '|', $aSorting);
+    }
 }

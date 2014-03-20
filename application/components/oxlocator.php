@@ -85,8 +85,8 @@ class oxLocator extends oxSuperCfg
     /**
      * Sets details locator data for articles that came from regular list.
      *
-     * @param oxubase   $oLocatorTarget view object
-     * @param oxarticle $oCurrArticle   current article
+     * @param oxUBase   $oLocatorTarget view object
+     * @param oxArticle $oCurrArticle   current article
      *
      * @return null
      */
@@ -94,7 +94,6 @@ class oxLocator extends oxSuperCfg
     {
         // if no active category is loaded - lets check for category passed by post/get
         if ( ( $oCategory = $oLocatorTarget->getActiveCategory() ) ) {
-            $sCatId = $oCategory->getId();
 
             $sOrderBy = null;
             if ( $oLocatorTarget->showSorting() ) {
@@ -297,7 +296,7 @@ class oxLocator extends oxSuperCfg
             $oSearchCat->nextProductLink = $this->_oNextProduct?$this->_makeLink( $this->_oNextProduct->getLink(), $sAddSearch ):null;
             $oSearchCat->prevProductLink = $this->_oBackProduct?$this->_makeLink( $this->_oBackProduct->getLink(), $sAddSearch ):null;
 
-            $sFormat = oxRegistry::getLang()->translateString( 'searchResult' );
+            $sFormat = oxRegistry::getLang()->translateString( 'SEARCH_RESULT' );
             $oLocatorTarget->setSearchTitle( sprintf( $sFormat, $sSearchFormParam ) );
             $oLocatorTarget->setActiveCategory( $oSearchCat );
         }

@@ -174,7 +174,7 @@ class oxUBase extends oxView
     protected $_sListOrderBy = null;
 
     /**
-     * Order directio of list
+     * Order direction of list
      * @var string
      */
     protected $_sListOrderDir = null;
@@ -562,7 +562,7 @@ class oxUBase extends oxView
                 // forcing to set noindex/follow meta
                 $this->_forceNoIndex();
 
-                if (!$this->getConfig()->isProductiveMode() || $this->getConfig()->getConfigParam('blSeoLogging')) {
+                if ( $this->getConfig()->getConfigParam('blSeoLogging') ) {
                     $sShopId = $this->getConfig()->getShopId();
                     $sLangId = oxRegistry::getLang()->getBaseLanguage();
                     $sIdent  = md5( strtolower( $sStdUrl ) . $sShopId . $sLangId );
@@ -696,7 +696,7 @@ class oxUBase extends oxView
      */
     public function getComponent( $sName )
     {
-        if ( $sName != null ) {
+        if ( isset( $sName ) && isset( $this->_oaComponents[$sName] ) ) {
             return $this->_oaComponents[$sName];
         }
     }
@@ -797,7 +797,7 @@ class oxUBase extends oxView
             $this->_sCustomListDisplayType = oxConfig::getParameter( 'ldtype' );
 
             if ( !$this->_sCustomListDisplayType ) {
-                $this->_sCustomListDisplayType = oxSession::getVar( 'ldtype' );
+                $this->_sCustomListDisplayType = oxRegistry::getSession()->getVariable( 'ldtype' );
             }
         }
         return $this->_sCustomListDisplayType;
@@ -987,7 +987,7 @@ class oxUBase extends oxView
      */
     public function getSavedSorting( $sSortIdent )
     {
-        $aSorting = oxSession::getVar( 'aSorting' );
+        $aSorting = oxRegistry::getSession()->getVariable( 'aSorting' );
         if ( isset( $aSorting[$sSortIdent] ) ) {
             return $aSorting[$sSortIdent];
         }
@@ -1039,11 +1039,11 @@ class oxUBase extends oxView
 
             $this->_aSortColumns = $aSortColumns;
 
-            $sCnid = oxConfig::getParameter( 'cnid' );
+            $sCnid = oxRegistry::getConfig()->getRequestParameter( 'cnid' );
 
 
-            $sSortBy  = oxConfig::getParameter( $this->getSortOrderByParameterName() );
-            $sSortDir = oxConfig::getParameter( $this->getSortOrderParameterName() );
+            $sSortBy  = oxRegistry::getConfig()->getRequestParameter( $this->getSortOrderByParameterName() );
+            $sSortDir = oxRegistry::getConfig()->getRequestParameter( $this->getSortOrderParameterName() );
 
             $oStr = getStr();
             if ( (!$sSortBy || !in_array( $oStr->strtolower($sSortBy), $aSortColumns) || !in_array( $oStr->strtolower($sSortDir), $aSortDir) ) && $aSorting = $this->getSorting( $sCnid ) ) {
@@ -1227,7 +1227,7 @@ class oxUBase extends oxView
     public function getCompareItemCount()
     {
         if ( $this->_iCompItemsCnt === null ) {
-            $aItems = oxSession::getVar('aFiltcompproducts');
+            $aItems = oxRegistry::getSession()->getVariable('aFiltcompproducts');
             $this->_iCompItemsCnt = is_array($aItems)?count($aItems):0;
         }
         return $this->_iCompItemsCnt;
@@ -1340,7 +1340,7 @@ class oxUBase extends oxView
             $iNrofCatArticles = ( in_array( $iNrofArticles, $aNrofCatArticles ) ) ? $iNrofArticles : $iNrofCatArticles;
             $oViewConf->setViewConfigParam( 'iartPerPage', $iNrofCatArticles );
             oxSession::setVar( '_artperpage', $iNrofCatArticles );
-        } elseif ( ( $iSessArtPerPage = oxSession::getVar( '_artperpage' ) )&& is_numeric( $iSessArtPerPage ) ) {
+        } elseif ( ( $iSessArtPerPage = oxRegistry::getSession()->getVariable( '_artperpage' ) )&& is_numeric( $iSessArtPerPage ) ) {
             // M45 Possibility to push any "Show articles per page" number parameter
             $iNrofCatArticles = ( in_array( $iSessArtPerPage, $aNrofCatArticles ) ) ? $iSessArtPerPage : $iNrofCatArticles;
             $oViewConf->setViewConfigParam( 'iartPerPage', $iSessArtPerPage );
@@ -1509,11 +1509,11 @@ class oxUBase extends oxView
      */
     public function setItemSorting( $sSortIdent, $sSortBy, $sSortDir = null )
     {
-        $aSorting = oxSession::getVar( 'aSorting' );
+        $aSorting = oxRegistry::getSession()->getVariable( 'aSorting' );
         $aSorting[$sSortIdent]['sortby']  = $sSortBy;
         $aSorting[$sSortIdent]['sortdir'] = $sSortDir ? $sSortDir : null;
 
-        oxSession::setVar( 'aSorting', $aSorting );
+        oxRegistry::getSession()->setVariable( 'aSorting', $aSorting );
     }
 
     /**
@@ -1544,13 +1544,13 @@ class oxUBase extends oxView
     /**
      * Returns part of SQL query with sorting params
      *
-     * @param string $sCnid sortable item id
+     * @param string $sIdent sortable item id
      *
      * @return string
      */
-    public function getSortingSql( $sCnid )
+    public function getSortingSql( $sIdent )
     {
-        $aSorting = $this->getSorting( $sCnid );
+        $aSorting = $this->getSorting( $sIdent );
         if ( is_array( $aSorting ) ) {
             return implode( " ", $aSorting );
         }
@@ -1589,7 +1589,7 @@ class oxUBase extends oxView
 
 
     /**
-     * returns object, assosiated with current view.
+     * returns object, associated with current view.
      * (the object that is shown in frontend)
      *
      * @param int $iLang language id
@@ -2036,7 +2036,7 @@ class oxUBase extends oxView
         if ( $this->_sAdditionalParams === null ) {
             // #1018A
             $this->_sAdditionalParams  = parent::getAdditionalParams();
-            $this->_sAdditionalParams .= 'cl='.$this->getConfig()->getActiveView()->getClassName();
+            $this->_sAdditionalParams .= 'cl='.$this->getConfig()->getTopActiveView()->getClassName();
 
             // #1834M - specialchar search
             $sSearchParamForLink = rawurlencode( oxConfig::getParameter( 'searchparam', true ) );
@@ -2508,6 +2508,8 @@ class oxUBase extends oxView
      * Template variable getter. Returns if order price is lower than
      * minimum order price setup (config param "iMinOrderPrice")
      *
+     * @deprecated in v4.8/5.1 on 2013-10-14; use oxBasket method
+     *
      * @return bool
      */
     public function isLowOrderPrice()
@@ -2521,6 +2523,8 @@ class oxUBase extends oxView
 
     /**
      * Template variable getter. Returns formatted min order price value
+     *
+     * @deprecated in v4.8/5.1 on 2013-10-14; use oxBasket method
      *
      * @return string
      */
@@ -2801,7 +2805,7 @@ class oxUBase extends oxView
             $this->_blCanAcceptFormData = false;
 
             $sFormId = oxConfig::getParameter( "uformid" );
-            $sSessionFormId = oxSession::getVar( "sessionuformid" );
+            $sSessionFormId = oxRegistry::getSession()->getVariable( "sessionuformid" );
 
             // testing if form and session ids matches
             if ( $sFormId && $sFormId === $sSessionFormId ) {
@@ -3164,7 +3168,7 @@ class oxUBase extends oxView
     public function getWishlistName()
     {
         if ( $this->getUser() ) {
-            $sUserId = oxConfig::getParameter( 'wishid') ? oxConfig::getParameter( 'wishid' ): oxSession::getVar( 'wishid');
+            $sUserId = oxConfig::getParameter( 'wishid') ? oxConfig::getParameter( 'wishid' ): oxRegistry::getSession()->getVariable( 'wishid');
             if ( $sUserId ) {
                 $oWishUser = oxNew( 'oxuser' );
                 if ( $oWishUser->load( $sUserId ) ) {
@@ -3175,4 +3179,13 @@ class oxUBase extends oxView
         return false;
     }
 
+    /**
+     * Get widget link for Ajax calls
+     *
+     * @return string
+     */
+    public function getWidgetLink()
+    {
+        return oxRegistry::getConfig()->getWidgetUrl();
+    }
 }

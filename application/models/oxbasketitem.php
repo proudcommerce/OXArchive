@@ -391,7 +391,7 @@ class oxBasketItem extends oxSuperCfg
 
         if ( $iOnStock !== true ) {
             $oEx = oxNew( 'oxOutOfStockException' );
-            $oEx->setMessage( 'EXCEPTION_OUTOFSTOCK_OUTOFSTOCK' );
+            $oEx->setMessage( 'ERROR_MESSAGE_OUTOFSTOCK_OUTOFSTOCK' );
             $oEx->setArticleNr( $oArticle->oxarticles__oxartnum->value );
             $oEx->setProductId( $oArticle->getProductId() );
             $oEx->setRemainingAmount( $this->_dAmount );
@@ -468,7 +468,7 @@ class oxBasketItem extends oxSuperCfg
             if ( !$this->_oArticle->load( $sProductId ) ) {
                 $oEx = oxNew( 'oxNoArticleException' );
                 $oLang = oxRegistry::getLang();
-                $oEx->setMessage( sprintf($oLang->translateString( 'EXCEPTION_ARTICLE_ARTICELDOESNOTEXIST', $oLang->getBaseLanguage() ), $sProductId) );
+                $oEx->setMessage( sprintf($oLang->translateString( 'ERROR_MESSAGE_ARTICLE_ARTICLE_DOES_NOT_EXIST', $oLang->getBaseLanguage() ), $sProductId) );
                 $oEx->setArticleNr( $sProductId );
                 $oEx->setProductId( $sProductId );
                 throw $oEx;
@@ -478,7 +478,7 @@ class oxBasketItem extends oxSuperCfg
             if ( $blCheckProduct && !$this->_oArticle->isVisible() ) {
                 $oEx = oxNew( 'oxNoArticleException' );
                 $oLang = oxRegistry::getLang();
-                $oEx->setMessage( sprintf($oLang->translateString( 'EXCEPTION_ARTICLE_ARTICELDOESNOTEXIST', $oLang->getBaseLanguage() ), $this->_oArticle->oxarticles__oxartnum->value) );
+                $oEx->setMessage( sprintf($oLang->translateString( 'ERROR_MESSAGE_ARTICLE_ARTICLE_DOES_NOT_EXIST', $oLang->getBaseLanguage() ), $this->_oArticle->oxarticles__oxartnum->value) );
                 $oEx->setArticleNr( $sProductId );
                 $oEx->setProductId( $sProductId );
                 throw $oEx;
@@ -487,7 +487,7 @@ class oxBasketItem extends oxSuperCfg
             // cant put not buyable product to basket
             if ( $blCheckProduct && !$this->_oArticle->isBuyable() ) {
                 $oEx = oxNew( 'oxArticleInputException' );
-                $oEx->setMessage( 'EXCEPTION_ARTICLE_ARTICELNOTBUYABLE' );
+                $oEx->setMessage( 'ERROR_MESSAGE_ARTICLE_ARTICLE_NOT_BUYABLE' );
                 $oEx->setArticleNr( $sProductId );
                 $oEx->setProductId( $sProductId );
                 throw $oEx;
@@ -915,6 +915,8 @@ class oxBasketItem extends oxSuperCfg
     /**
      * Returns formatted regular unit price
      *
+     * @deprecated in v4.8/5.1 on 2013-10-08; use oxPrice smarty formatter
+     *
      * @return string
      */
     public function getFRegularUnitPrice()
@@ -925,6 +927,8 @@ class oxBasketItem extends oxSuperCfg
     /**
      * Returns formatted unit price
      *
+     * @deprecated in v4.8/5.1 on 2013-10-08; use oxPrice smarty formatter
+     *
      * @return string
      */
     public function getFUnitPrice()
@@ -934,6 +938,8 @@ class oxBasketItem extends oxSuperCfg
 
     /**
      * Returns formatted total price
+     *
+     * @deprecated in v4.8/5.1 on 2013-10-08; use oxPrice smarty formatter
      *
      * @return string
      */

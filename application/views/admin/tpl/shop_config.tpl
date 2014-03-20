@@ -394,6 +394,30 @@ function showInvitations()
                 <div class="spacer"></div>
             </dl>
 
+            <dl>
+                <dt>
+                    <input type=hidden name=confbools[blShowTSInternationalFeesMessage] value=false>
+                    <input type=checkbox name=confbools[blShowTSInternationalFeesMessage] value=true  [{if ($confbools.blShowTSInternationalFeesMessage)}]checked[{/if}] [{ $readonly}]>
+                    [{ oxinputhelp ident="HELP_SHOP_CONFIG_SHOWTSINTERNATIONALFEESMESSAGE" }]
+                </dt>
+                <dd>
+                    [{ oxmultilang ident="SHOP_CONFIG_SHOWTSINTERNATIONALFEESMESSAGE" }]
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+
+            <dl>
+                <dt>
+                    <input type=hidden name=confbools[blShowTSCODMessage] value=false>
+                    <input type=checkbox name=confbools[blShowTSCODMessage] value=true  [{if ($confbools.blShowTSCODMessage)}]checked[{/if}] [{ $readonly}]>
+                    [{ oxinputhelp ident="HELP_SHOP_CONFIG_SHOWTSCODMESSAGE" }]
+                </dt>
+                <dd>
+                    [{ oxmultilang ident="SHOP_CONFIG_SHOWTSCODMESSAGE" }]
+                </dd>
+                <div class="spacer"></div>
+            </dl>
+
          </div>
     </div>
 
@@ -402,7 +426,7 @@ function showInvitations()
             <a href="#" onclick="_groupExp(this);return false;" class="rc"><b>[{ oxmultilang ident="SHOP_OPTIONS_GROUP_VAT" }]</b></a>
             <dl>
                 <dt>
-                    <input type=text class="txt" style="width:70" name=confstrs[dDefaultVAT] value="[{$confstrs.dDefaultVAT}]" [{ $readonly}]>
+                    <input type=text class="txt" style="width:70" name=confnum[dDefaultVAT] value="[{$confnum.dDefaultVAT}]" [{ $readonly}]>
                     [{ oxinputhelp ident="HELP_SHOP_CONFIG_DEFAULTVAT" }]
                 </dt>
                 <dd>

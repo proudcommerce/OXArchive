@@ -1,4 +1,4 @@
-[{assign var="template_title" value="REVIEW_YOURREVIEW"|oxmultilangassign }]
+[{assign var="template_title" value="YOUR_REVIEW"|oxmultilangassign }]
 
 [{capture append="oxidBlock_content"}]
 
@@ -10,7 +10,7 @@
             [{block name="widget_product_listitem_line_picturebox"}]
             <div class="pictureBox">
                 <a class="sliderHover" href="[{ $_productLink }]" title="[{ $product->oxarticles__oxtitle->value}]"></a>
-                <a href="[{$_productLink}]" class="viewAllHover glowShadow corners" title="[{ $product->oxarticles__oxtitle->value}]"><span>[{oxmultilang ident="WIDGET_PRODUCT_PRODUCT_DETAILS"}]</span></a>
+                <a href="[{$_productLink}]" class="viewAllHover glowShadow corners" title="[{ $product->oxarticles__oxtitle->value}]"><span>[{oxmultilang ident="PRODUCT_DETAILS"}]</span></a>
                 <img src="[{$product->getThumbnailUrl()}]" alt="[{ $product->oxarticles__oxtitle->value}]">
             </div>
             [{/block}]
@@ -40,8 +40,12 @@
 
     [{if $oView->isReviewActive() }]
     <div class="widgetBox reviews">
-        <h4>[{oxmultilang ident="DETAILS_PRODUCTREVIEW"}]</h4>
-        [{include file="widget/reviews/reviews.tpl" sReviewUserHash=$oView->getReviewUserHash() oDetailsProduct=$oView->getProduct() oReviewUser=$oView->getReviewUser() }]
+        <h4>[{oxmultilang ident="WRITE_PRODUCT_REVIEW"}]</h4>
+        [{assign var="product" value=$oView->getProduct()}]
+        [{if $oxcmp_user}]
+            [{assign var="force_sid" value=$oView->getSidForWidget()}]
+        [{/if}]
+        [{oxid_include_widget cl="oxwReview" nocookie=1 force_sid=$force_sid _parent=$oView->getClassName() type=oxarticle anid=$product->oxarticles__oxnid->value aid=$product->oxarticles__oxid->value canrate=$oView->canRate() reviewuserhash=$oView->getReviewUserHash() skipESIforUser=1}]
     </div>
     [{/if}]
 [{/capture}]

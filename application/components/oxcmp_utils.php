@@ -41,6 +41,8 @@ class oxcmp_utils extends oxView
      * In this case, the last list object will be used. Loaded article info
      * is serialized and outputted to client system.
      *
+     * @deprecated since v5.1 (2013-09-25); not used anywhere
+     *
      * @return null
      */
     public function getArticle()

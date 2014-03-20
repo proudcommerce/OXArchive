@@ -23,5 +23,6 @@
 
 require_once dirname(__FILE__) . "/bootstrap.php";
 
+//oxDb::getDb()->query( "delete from mysql_log;" );
 //Starts the shop
 Oxid::run();

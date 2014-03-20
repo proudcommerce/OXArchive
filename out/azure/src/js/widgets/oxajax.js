@@ -143,6 +143,7 @@
             var type   = "";
             if (activator[0].tagName == 'FORM') {
                 $("input", activator).each(function() {
+                    if (this.type == 'checkbox' && !this.checked) return true;
                     inputs[this.name] = this.value;
                 });
                 action = activator.attr("action");
@@ -155,6 +156,16 @@
                 $.each(params['additionalData'], function(i, f) {inputs[i] = f;});
             }
 
+            // sorting array to pass parameters alphabetically
+            var aInputs = {};
+            var keys = Array();
+            for ( var key in inputs ) {
+                if ( inputs.hasOwnProperty( key ) ) {
+                    keys.push( key );
+                }
+            }
+            keys.sort().forEach( function( i ) { aInputs[i] = inputs[i]; } )
+
             var sLoadingScreen = null;
             if (params['targetEl']) {
                 sLoadingScreen = self.loadingScreen.start(params['targetEl'], params['iconPosEl']);
@@ -165,11 +176,13 @@
             }
 
             jQuery.ajax({
-                data    : inputs,
+                data    : aInputs,
                 url     : action,
                 type    : type,
                 timeout : 30000,
-
+                beforeSend: function( jqXHR, settings ) {
+                    settings.url = settings.url.replace( "&&", "&" );
+                },
                 error   : function(jqXHR, textStatus, errorThrown) {
                     if (sLoadingScreen) {
                         self.loadingScreen.stop(sLoadingScreen);
@@ -221,6 +234,11 @@
             try {
                 $("script", container).each(function(){
                     try {
+                        if (this.src != '' && $('body > script[src="'+this.src+'"]').length == 0) {
+                            $('body').append(this);
+                            document.body.appendChild(this);
+                            return true;
+                        }
                         eval(this.innerHTML);
                     } catch (e) {
                        self.reportJSError(e);

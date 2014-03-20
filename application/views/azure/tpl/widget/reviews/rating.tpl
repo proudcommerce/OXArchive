@@ -5,11 +5,11 @@
     [{math equation="x*y" x=20 y=$oView->getRatingValue() assign="iRatingAverage"}]
 
     [{if !$oxcmp_user}]
-        [{assign var="_star_title" value="DETAILS_LOGIN"|oxmultilangassign}]
+        [{assign var="_star_title" value="MESSAGE_LOGIN_TO_RATE"|oxmultilangassign}]
     [{elseif !$oView->canRate()}]
-        [{assign var="_star_title" value="DETAILS_ALREADYRATED"|oxmultilangassign}]
+        [{assign var="_star_title" value="MESSAGE_ALREADY_RATED"|oxmultilangassign}]
     [{else}]
-        [{assign var="_star_title" value="DETAILS_RATETHISARTICLE"|oxmultilangassign}]
+        [{assign var="_star_title" value="MESSAGE_RATE_THIS_ARTICLE"|oxmultilangassign}]
     [{/if}]
 
     <li class="currentRate" style="width: [{$iRatingAverage}]%;">
@@ -20,7 +20,8 @@
         <li class="s[{$smarty.section.star.index}]">
             <a  class="[{if $oView->canRate()}]ox-write-review[{/if}] ox-rateindex-[{$smarty.section.star.index}]" rel="nofollow"
                 [{if !$oxcmp_user}]
-                    href="[{ oxgetseourl ident=$oViewConf->getSelfLink()|cat:"cl=account" params="anid=`$oDetailsProduct->oxarticles__oxnid->value`"|cat:"&amp;sourcecl="|cat:$oViewConf->getActiveClassName()|cat:$oViewConf->getNavUrlParams() }]"
+                    [{assign var="sAnid" value=$oView->getArticleNId()}]
+                    href="[{ oxgetseourl ident=$oViewConf->getSelfLink()|cat:"cl=account" params="anid=$sAnid"|cat:"&amp;sourcecl="|cat:$oViewConf->getTopActiveClassName()|cat:$oViewConf->getNavUrlParams() }]"
                 [{elseif $oView->canRate()}]
                     href="#review"
                 [{/if}]
@@ -33,10 +34,11 @@
             [{if $oView->getRatingCount()}]
                 ([{$oView->getRatingCount()}])
             [{else}]
-                [{oxmultilang ident="DETAILS_NORATINGS"}]
+                [{oxmultilang ident="NO_RATINGS"}]
             [{/if}]
         </a>
     </li>
 </ul>
+[{oxscript widget=$oView->getClassName()}]
 
 

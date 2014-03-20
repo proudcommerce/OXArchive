@@ -129,7 +129,9 @@ class oxOutOfStockException extends oxArticleException
     {
         // in case destination not set, overriding default error message
         if ( !$sDestination ) {
-            $this->message = oxRegistry::getLang()->translateString( $this->getMessage() ) . " " . $this->getRemainingAmount();
+            $this->message = oxRegistry::getLang()->translateString( $this->getMessage() ) . ": " . $this->getRemainingAmount();
+        } else {
+            $this->message = oxRegistry::getLang()->translateString( $this->getMessage() ) . ": ";
         }
     }
 }

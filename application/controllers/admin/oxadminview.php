@@ -481,7 +481,6 @@ class oxAdminView extends oxView
         }
     }
 
-
     /**
      * Checks if current $sUserId user is not an admin and checks if user is able to be edited by logged in user.
      * This method does not perform full rights check.

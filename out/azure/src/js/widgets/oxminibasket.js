@@ -22,7 +22,7 @@
  */
 ( function( $ ) {
 
-    oxMiniBasket = {
+    var oxMiniBasket = {
 
         _create: function(){
 
@@ -31,6 +31,8 @@
                 el      = self.element;
 
             var timeout;
+
+            $( "form.js-oxWidgetReload-miniBasket" ).submit( formSubmit );
 
             // show on hover after some time
             $("#minibasketIcon", el).hover(function(){
@@ -53,6 +55,14 @@
                 return false;
             });
 
+            // close basket on ESC key
+            $(document).keydown( function( e ) {
+                if( e.which == 27) {
+                    $(".basketFlyout").hide();
+                    clearTimeout(timeout);
+                }
+             });
+
             // show / hide added article message
             if($("#newItemMsg").length > 0){
                 $("#countValue").hide();
@@ -70,6 +80,8 @@
                         $("#countValue").parent('span').remove();
                         $("#basketFlyout").remove();
                         $("#miniBasket #minibasketIcon").unbind('mouseenter mouseleave');
+                        // refresh mini basket widget
+                        $( "form.js-oxWidgetReload-miniBasket" ).submit();
                         return container.not(element);
                     }
                     return null;
@@ -87,7 +99,40 @@
                     verticalArrowPositions: 'split'
                 });
             }
+        },
+
+        /**
+         * Reloads block
+         *
+         * @param activator
+         * @param contentTarget
+         * @returns {boolean}
+         */
+        reload: function ( activator, contentTarget ) {
+            oxAjax.ajax(
+                activator, {//onSuccess
+                    'onSuccess': function ( r ) {
+                        $( contentTarget ).html( r );
+                        if ( typeof WidgetsHandler !== 'undefined' ) {
+                            WidgetsHandler.reloadWidget( 'oxwMiniBasket' );
+                        } else {
+                            oxAjax.evalScripts( contentTarget );
+                        }
+                    }
+                }
+            );
+            return false;
         }
+    }
+
+    /**
+     * Handles form submit
+     *
+     * @returns {*}
+     */
+    function formSubmit() {
+        var target = $( this );
+        return oxMiniBasket.reload( $( target ), $( "#minibasket_container" )[0] );
     }
 
     $.widget( "ui.oxMiniBasket", oxMiniBasket );

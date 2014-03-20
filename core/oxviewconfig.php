@@ -64,11 +64,24 @@ class oxViewConfig extends oxSuperCfg
     protected $_oCountryList = null;
 
     /**
+     * Trusted shop ratings
+     *
+     * @var null
+     */
+    protected $_aTrustedShopRatings = null;
+
+    /**
      * Active theme name
      *
      * @var null
      */
     protected $_sActiveTheme = null;
+
+    /**
+     * Shop logo
+     * @var string
+     */
+    protected $_sShopLogo = null;
 
     /**
      * Returns shops home link
@@ -362,6 +375,8 @@ class oxViewConfig extends oxSuperCfg
 
     /**
      * Returns session id
+     *
+     * @deprecated v5.1.0 Use conditional sid getter oxView::getSidForWidget() for widgets instead
      *
      * @return string
      */
@@ -776,11 +791,13 @@ class oxViewConfig extends oxSuperCfg
     /**
      * Returns config param "blShowFinalStep" value
      *
-     * @return string
+     * @deprecated since 2012-11-19. Option blShowFinalStep is removed
+     *
+     * @return bool
      */
     public function showFinalStep()
     {
-        return $this->getConfig()->getConfigParam( 'blShowFinalStep' );
+        return true;
     }
 
     /**
@@ -954,7 +971,7 @@ class oxViewConfig extends oxSuperCfg
         if ( ( $sParams = $this->getViewConfigParam( 'navformparams' ) ) === null ) {
             $oStr = getStr();
             $sParams = '';
-            $aNavParams = $this->getConfig()->getActiveView()->getNavigationParams();
+            $aNavParams = $this->getConfig()->getTopActiveView()->getNavigationParams();
             foreach ( $aNavParams as $sName => $sValue ) {
                 if ( isset( $sValue ) ) {
                     $sParams .= "<input type=\"hidden\" name=\"{$sName}\" value=\"".$oStr->htmlentities( $sValue )."\" />\n";
@@ -1132,6 +1149,8 @@ class oxViewConfig extends oxSuperCfg
     /**
      * Returns Trusted Shops Widget image url
      *
+     * @deprecated since v4.7.6/5.0.6 (2013-07-09); new Trusted Shops badge added
+     *
      * @return string
      */
     public function getTsWidgetUrl()
@@ -1158,6 +1177,8 @@ class oxViewConfig extends oxSuperCfg
     /**
      * Trusted Shops widget info url
      *
+     * @deprecated since v4.7.6/5.0.6 (2013-07-09); new Trusted Shops badge added
+     *
      * @return string | bool
      */
     public function getTsInfoUrl()
@@ -1176,6 +1197,25 @@ class oxViewConfig extends oxSuperCfg
         }
 
         return $sUrl;
+    }
+
+    /**
+     * Gets Trusted shops ratings from Trusted shops
+     *
+     * @return array
+     */
+    public function getTsRatings()
+    {
+        if ( $this->_aTrustedShopRatings === null ) {
+            if ( $sTsId = $this->getTsId() ) {
+                $oTsRatings = oxNew( "oxTsRatings" );
+                $oTsRatings->setTsId( $sTsId );
+                $this->_aTrustedShopRatings = $oTsRatings->getRatings();
+
+                return $this->_aTrustedShopRatings;
+            }
+        }
+        return $this->_aTrustedShopRatings;
     }
 
     /**
@@ -1425,4 +1465,36 @@ class oxViewConfig extends oxSuperCfg
         return $this->_sActiveTheme;
     }
 
+    /**
+     * Returns shop logo image file name from config option
+     *
+     * @return string
+     */
+    public function getShopLogo()
+    {
+        if ( is_null( $this->_sShopLogo ) ) {
+
+            $sLogoImage = $this->getConfig()->getConfigParam( 'sShopLogo' );
+            if ( empty( $sLogoImage ) )
+            {
+                $sLogoImage = "logo.png";
+            }
+
+            $this->setShopLogo( $sLogoImage );
+        }
+
+        return $this->_sShopLogo;
+    }
+
+    /**
+     * Sets shop logo
+     *
+     * @param string $sLogo shop logo image file name
+     *
+     * @return null
+     */
+    public function setShopLogo( $sLogo )
+    {
+        $this->_sShopLogo = $sLogo;
+    }
 }

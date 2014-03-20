@@ -125,6 +125,11 @@ class Login extends oxAdminView
 
         // success
         oxRegistry::getUtils()->logger( "login successful" );
+
+        //execute onAdminLogin() event
+        $oEvenHandler = oxNew("oxSystemEventHandler");
+        $oEvenHandler->onAdminLogin( oxRegistry::getConfig()->getShopId() );
+
         // #533
         if ( isset( $sProfile ) ) {
             $aProfiles = oxSession::getVar( "aAdminProfiles" );

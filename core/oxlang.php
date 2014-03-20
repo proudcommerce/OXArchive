@@ -173,7 +173,7 @@ class oxLang extends oxSuperCfg
                 }
             }
 
-            // if language still not setted and not search engine browsing,
+            // if language still not set and not search engine browsing,
             // getting language from browser
             if ( is_null( $this->_iBaseLanguageId ) && !$blAdmin && !oxRegistry::getUtils()->isSearchEngine() ) {
 
@@ -430,7 +430,7 @@ class oxLang extends oxSuperCfg
      */
     public function translateString( $sStringToTranslate, $iLang = null, $blAdminMode = null )
     {
-        // checking if in cash exist
+        // checking if in cache exist
         $aLang = $this->_getLangTranslationArray( $iLang, $blAdminMode );
         if ( isset( $aLang[$sStringToTranslate] ) ) {
             return $aLang[$sStringToTranslate];
@@ -496,12 +496,12 @@ class oxLang extends oxSuperCfg
         $aSimilarConst = $this->_collectSimilar( $aLang, $sKey );
 
         // checking if in map exist
-        $aMap = $this->_getLanguageMap( $iLang, $blAdminMode );
+        $aMap = $this->_getLanguageMap( $iLang, $blAdmin );
         $aSimilarConst = $this->_collectSimilar( $aMap, $sKey, $aSimilarConst );
 
         // checking if in theme options exist
         if ( count( $this->_aAdditionalLangFiles ) ) {
-            $aLang = $this->_getLangTranslationArray( $iLang, $blAdminMode, $this->_aAdditionalLangFiles);
+            $aLang = $this->_getLangTranslationArray( $iLang, $blAdmin, $this->_aAdditionalLangFiles);
             $aSimilarConst = $this->_collectSimilar( $aLang, $sKey, $aSimilarConst );
         }
 
@@ -953,13 +953,22 @@ class oxLang extends oxSuperCfg
         if ( !isset( $this->_aLangMap[$sKey] ) ) {
             $this->_aLangMap[$sKey] = array();
             $myConfig = $this->getConfig();
-            $sMapFile = $myConfig->getAppDir() . '/views/' .  ( $blAdmin ? 'admin' : $myConfig->getConfigParam( "sTheme" ) ) .'/' . oxRegistry::getLang()->getLanguageAbbr( $iLang ) . '/map.php';
-            if ( $sMapFile ) {
-                if ( file_exists( $sMapFile ) && is_readable( $sMapFile ) ) {
-                    include $sMapFile;
-                    $this->_aLangMap[$sKey] = $aMap;
-                }
+
+            $sMapFile = '';
+            $sParentMapFile = $myConfig->getAppDir() . '/views/' .  ( $blAdmin ? 'admin' : $myConfig->getConfigParam( "sTheme" ) ) .'/' . oxRegistry::getLang()->getLanguageAbbr( $iLang ) . '/map.php';
+            $sCustomThemeMapFile = $myConfig->getAppDir() . '/views/' .  ( $blAdmin ? 'admin' : $myConfig->getConfigParam( "sCustomTheme" ) ) .'/' . oxRegistry::getLang()->getLanguageAbbr( $iLang ) . '/map.php';
+
+            if ( file_exists( $sCustomThemeMapFile ) && is_readable( $sCustomThemeMapFile ) ) {
+                $sMapFile = $sCustomThemeMapFile;
+            } elseif ( file_exists( $sParentMapFile ) && is_readable( $sParentMapFile ) ) {
+                $sMapFile = $sParentMapFile;
             }
+
+            if ( $sMapFile ) {
+                include $sMapFile;
+                $this->_aLangMap[$sKey] = $aMap;
+            }
+
         }
 
         return $this->_aLangMap[$sKey];

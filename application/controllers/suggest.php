@@ -98,7 +98,7 @@ class Suggest extends oxUBase
 
         if ( !$oCaptcha->pass( $sMac, $sMacHash ) ) {
             // even if there is no exception, use this as a default display method
-            $oUtilsView->addErrorToDisplay( 'EXCEPTION_INPUT_WRONGCAPTCHA' );
+            $oUtilsView->addErrorToDisplay( 'MESSAGE_WRONG_VERIFICATION_CODE' );
             return false;
         }
 
@@ -292,7 +292,7 @@ class Suggest extends oxUBase
     {
         $aPaths = array();
         $aPath  = array();
-        $aPath['title'] = oxRegistry::getLang()->translateString( 'PAGE_INFO_SUGGEST_TITLE', oxRegistry::getLang()->getBaseLanguage(), false );
+        $aPath['title'] = oxRegistry::getLang()->translateString( 'RECOMMEND_PRODUCT', oxRegistry::getLang()->getBaseLanguage(), false );
         $aPath['link']  = $this->getLink();
 
         $aPaths[] = $aPath;

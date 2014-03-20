@@ -38,6 +38,7 @@ define( 'OXARTICLE_LINKTYPE_RECOMM', 5 );
  */
 class oxArticle extends oxI18n implements oxIArticle, oxIUrl
 {
+
     /**
      * Current class name
      *
@@ -324,6 +325,13 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
     protected $_sToBasketLink = null;
 
     /**
+     * Article stock status when article is initially loaded.
+     *
+     * @var int
+     */
+    protected $_iStockStatusOnLoad = null;
+
+    /**
      * Stock status
      *
      * @var integer
@@ -498,6 +506,17 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
     }
 
     /**
+     * Checks whether object is in list or not
+     * It's needed for oxArticle so that it can pass this to widgets
+
+     * @return bool
+     */
+    public function isInList()
+    {
+        return $this->_isInList();
+    }
+
+    /**
      * Sets object ID, additionally sets $this->oxarticles__oxnid field value
      *
      * @param string $sId New ID
@@ -562,7 +581,7 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
         //do not check for variants
         if ( $myConfig->getConfigParam( 'blUseStock' ) ) {
             $sQ = " and ( $sTable.oxstockflag != 2 or ( $sTable.oxstock + $sTable.oxvarstock ) > 0  ) ";
-            //V #M513: When Parent article is not purchaseble, it's visibility should be displayed in shop only if any of Variants is available.
+            //V #M513: When Parent article is not purchasable, it's visibility should be displayed in shop only if any of Variants is available.
             if ( !$myConfig->getConfigParam( 'blVariantParentBuyable' ) ) {
                 $sTimeCheckQ = '';
                 if ( $myConfig->getConfigParam( 'blUseTimeCheck' ) ) {
@@ -892,6 +911,9 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
         if ( $aData ) {
             $this->assign( $aData );
             // convert date's to international format
+
+            $this->_iStockStatusOnLoad = $this->_iStockStatus;
+
             $this->_isLoaded = true;
             return true;
         }
@@ -1205,6 +1227,16 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
     }
 
     /**
+     * Returns amount of variants article has
+     *
+     * @return mixed
+     */
+    public function getVariantsCount()
+    {
+        return $this->oxarticles__oxvarcount->value;
+    }
+
+    /**
      * Checks if article has multidimensional variants
      *
      * @return bool
@@ -1316,7 +1348,7 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
         $oVariants = array();
         if ( ( $sId = $this->getId() ) ) {
             //do not load me as a parent later
-            self::$_aLoadedParents[$sId] = $this;
+            self::$_aLoadedParents[$sId . "_" . $this->getLanguage()] = $this;
 
             $myConfig = $this->getConfig();
 
@@ -2056,8 +2088,6 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
             return;
         }
 
-        $this->beforeUpdate();
-
         // article is not variant - should be updated current amount
         if ( !$this->oxarticles__oxparentid->value ) {
             //updating by SQL query, due to wrong behaviour if saving article using not admin mode
@@ -2069,8 +2099,6 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
             $oUpdateArticle = $this->getParentArticle();
             $oUpdateArticle->updateSoldAmount( $dAmount );
         }
-
-        $this->onChange( ACTION_UPDATE );
 
         return $rs;
     }
@@ -2108,7 +2136,7 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
      */
     public function resetParent()
     {
-        $sParentId = $this->oxarticles__oxparentid;
+        $sParentId = $this->oxarticles__oxparentid->value;
         $this->oxarticles__oxparentid = new oxField( '', oxField::T_RAW );
         $this->_blAllowEmptyParentId = true;
         $this->save();
@@ -2258,6 +2286,7 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
         // resetting articles count cache if stock has changed and some
         // articles goes offline (M:1448)
         if ( $sAction === ACTION_UPDATE_STOCK ) {
+            $this->_assignStock();
             $this->_onChangeStockResetCount( $sOXID );
         }
 
@@ -2320,7 +2349,7 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
                 return $iOnStock;
             } else {
                 $oEx = oxNew( 'oxArticleInputException' );
-                $oEx->setMessage( 'EXCEPTION_ARTICLE_ARTICELNOTBUYABLE' );
+                $oEx->setMessage( 'ERROR_MESSAGE_ARTICLE_ARTICLE_NOT_BUYABLE' );
                 oxRegistry::get("oxUtilsView")->addErrorToDisplay( $oEx );
                 return false;
             }
@@ -2589,7 +2618,7 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
      *
      * @param string $sTag tag
      *
-     * @deprecated 2012-12-21. Use oxarticletags::getStdTagLink instead
+     * @deprecated since v5.0.3 (2012-12-21). Use oxarticletags::getStdTagLink instead
      *
      * @return string
      */
@@ -2603,7 +2632,7 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
     /**
      * Returns article tags
      *
-     * @deprecated 2012-12-21. Use oxarticletags::getTags instead
+     * @deprecated since v5.0.3 (2012-12-21); Use oxarticletags::getTags instead
      *
      * @return string;
      */
@@ -2619,7 +2648,7 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
      *
      * @param string $sTags article tag
      *
-     * @deprecated 2012-12-21. Use oxarticletags::saveTags instead
+     * @deprecated since v5.0.3 (2012-12-21); Use oxarticletags::saveTags instead
      *
      * @return bool
      */
@@ -2640,7 +2669,7 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
      *
      * @param string $sTag new tag
      *
-     * @deprecated 2012-12-21. Use oxarticletags::addTag instead
+     * @deprecated since v5.0.3 (2012-12-21); Use oxarticletags::addTag instead
      *
      * @return bool
      */
@@ -2772,6 +2801,26 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
     }
 
     /**
+     * Check if stock status has changed since loading the article
+     *
+     * @return bool
+     */
+    protected function _isStockStatusChanged()
+    {
+        return $this->_iStockStatus != $this->_iStockStatusOnLoad;
+    }
+
+    /**
+     * Check if visibility has changed since loading the article
+     *
+     * @return bool
+     */
+    protected function _isVisibilityChanged()
+    {
+        return $this->_isStockStatusChanged() && ($this->_iStockStatus == -1 || $this->_iStockStatusOnLoad == -1);
+    }
+
+    /**
      * Returns formatted delivery date. If the date is not set ('0000-00-00') returns false.
      *
      * @return string | bool
@@ -2787,6 +2836,8 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
     /**
      * Returns rounded T price.
      *
+     * @deprecated since v5.1 (2013-10-03); use getTPrice() and oxPrice modifier;
+     *
      * @return double | bool
      */
     public function getFTPrice()
@@ -2801,6 +2852,8 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
 
     /**
      * Returns formatted product's price.
+     *
+     * @deprecated since v5.1 (2013-10-04); use oxPrice smarty plugin for formatting in templates
      *
      * @return double
      */
@@ -2829,6 +2882,8 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
     /**
      * Returns formatted product's NETTO price.
      *
+     * @deprecated since v5.1 (2013-10-03); use getPrice() and oxPrice modifier;
+     *
      * @return double
      */
     public function getFNetPrice()
@@ -2841,7 +2896,7 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
     /**
      * Returns formatted price per unit
      *
-     * @deprecated since v5.0 (2012-091-4); use getFUnitPrice();
+     * @deprecated since v5.0 (2012-01-4); use getFUnitPrice();
      *
      * @return string
      */
@@ -2981,6 +3036,8 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
 
     /**
      * Returns article file url
+     *
+     * @deprecated since v5.0.1 (2012-11-15) as article file is duplicate of media. Use getMediaUrls() instead for file media.
      *
      * @return string
      */
@@ -3668,9 +3725,6 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
                 if ( $this->_isFieldEmpty( $sCopyFieldName ) && !$this->_hasMasterImage( $iIndex ) && !$this->_hasMasterImage( 1 ) ) {
                     $this->$sCopyFieldName = clone $oParentArticle->$sCopyFieldName;
                 }
-            } elseif ( stristr($sCopyFieldName, '_oxpicsgenerated') && $this->{$sCopyFieldName}->value == 0 ) {
-                // if no pics generated for variants, load all from
-                $this->$sCopyFieldName = clone $oParentArticle->$sCopyFieldName;
             } elseif ($this->_isFieldEmpty($sCopyFieldName) || in_array( $sCopyFieldName, $this->_aCopyParentField ) ) {
                 $this->$sCopyFieldName = clone $oParentArticle->$sCopyFieldName;
             }
@@ -4663,6 +4717,7 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
     /**
      * Returns formatted price per unit
      *
+     * @deprecated since v5.1 (2013-09-25); use oxPrice smarty plugin for formatting in templates
      * @return string
      */
     public function getFUnitPrice()
@@ -4680,7 +4735,7 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
 
 
     /**
-     * Returns formatted price per unit
+     * Returns price per unit
      *
      * @return string
      */
@@ -4692,9 +4747,9 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
         }
 
         $oPrice = null;
-        if ( (double) $this->oxarticles__oxunitquantity->value && $this->oxarticles__oxunitname->value ) {
+        if ( (double) $this->getUnitQuantity() && $this->oxarticles__oxunitname->value ) {
             $oPrice = clone $this->getPrice();
-            $oPrice->divide( (double) $this->oxarticles__oxunitquantity->value );
+            $oPrice->divide( (double) $this->getUnitQuantity() );
         }
 
         return $oPrice;
@@ -4703,6 +4758,8 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
 
     /**
      * Returns formatted article min price
+     *
+     * @deprecated since v5.1 (2013-10-04); use oxPrice smarty plugin for formatting in templates
      *
      * @return string
      */
@@ -4719,6 +4776,8 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
 
      /**
      * Returns formatted min article variant price
+     *
+     * @deprecated since v5.1 (2013-10-04); use oxPrice smarty plugin for formatting in templates
      *
      * @return string
      */
@@ -4992,6 +5051,11 @@ class oxArticle extends oxI18n implements oxIArticle, oxIUrl
             $dPrice = oxDb::getDb()->getOne( $sSql );
         }
         return $dPrice;
+    }
+
+    public function getUnitQuantity()
+    {
+        return $this->oxarticles__oxunitquantity->value;
     }
 
 }

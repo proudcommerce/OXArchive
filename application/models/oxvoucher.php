@@ -96,7 +96,7 @@ class oxVoucher extends oxBase
 
             if ( ! ( $oRet = $this->assignRecord( $sQ ) ) ) {
                 $oEx = oxNew( 'oxVoucherException' );
-                $oEx->setMessage( 'EXCEPTION_VOUCHER_NOVOUCHER' );
+                $oEx->setMessage( 'ERROR_MESSAGE_VOUCHER_NOVOUCHER' );
                 $oEx->setVoucherNr( $sVoucherNr );
                 throw $oEx;
             }
@@ -240,7 +240,7 @@ class oxVoucher extends oxBase
         $oCur = $this->getConfig()->getActShopCurrencyObject();
         if ( $oSerie->oxvoucherseries__oxminimumvalue->value && $dPrice < ($oSerie->oxvoucherseries__oxminimumvalue->value*$oCur->rate) ) {
             $oEx = oxNew( 'oxVoucherException' );
-            $oEx->setMessage('EXCEPTION_VOUCHER_INCORRECTPRICE');
+            $oEx->setMessage('ERROR_MESSAGE_VOUCHER_INCORRECTPRICE');
             $oEx->setVoucherNr($this->oxvouchers__oxvouchernr->value);
             throw $oEx;
         }
@@ -273,7 +273,7 @@ class oxVoucher extends oxBase
                     $oVoucher->load($voucherId);
                     if ( $this->oxvouchers__oxvoucherserieid->value == $oVoucher->oxvouchers__oxvoucherserieid->value ) {
                             $oEx = oxNew( 'oxVoucherException' );
-                            $oEx->setMessage('EXCEPTION_VOUCHER_NOTALLOWEDSAMESERIES');
+                            $oEx->setMessage('ERROR_MESSAGE_VOUCHER_NOTALLOWEDSAMESERIES');
                             $oEx->setVoucherNr( $this->oxvouchers__oxvouchernr->value );
                             throw $oEx;
                     }
@@ -315,7 +315,7 @@ class oxVoucher extends oxBase
             }
             if ( !$blAvailable ) {
                     $oEx = oxNew( 'oxVoucherException' );
-                    $oEx->setMessage('EXCEPTION_VOUCHER_NOTALLOWEDOTHERSERIES');
+                    $oEx->setMessage('ERROR_MESSAGE_VOUCHER_NOTALLOWEDOTHERSERIES');
                     $oEx->setVoucherNr($this->oxvouchers__oxvouchernr->value);
                     throw $oEx;
             }
@@ -352,7 +352,7 @@ class oxVoucher extends oxBase
         }
 
         $oEx = oxNew( 'oxVoucherException' );
-        $oEx->setMessage('EXCEPTION_VOUCHER_ISNOTVALIDDATE');
+        $oEx->setMessage('MESSAGE_COUPON_EXPIRED');
         if ( $iFrom > time() && $iTo > time() ) {
             $oEx->setMessage('ERROR_MESSAGE_VOUCHER_NOVOUCHER');
         }
@@ -421,7 +421,7 @@ class oxVoucher extends oxBase
 
             if ( $oDb->getOne( $sSelect )) {
                 $oEx = oxNew( 'oxVoucherException' );
-                $oEx->setMessage('EXCEPTION_VOUCHER_NOTAVAILABLEINOTHERORDER');
+                $oEx->setMessage('ERROR_MESSAGE_VOUCHER_NOTALLOWEDSAMESERIES');
                 $oEx->setVoucherNr($this->oxvouchers__oxvouchernr->value);
                 throw $oEx;
             }
@@ -458,7 +458,7 @@ class oxVoucher extends oxBase
         }
 
         $oEx = oxNew( 'oxVoucherException' );
-        $oEx->setMessage( 'EXCEPTION_VOUCHER_NOTVALIDUSERGROUP' );
+        $oEx->setMessage( 'ERROR_MESSAGE_VOUCHER_NOTVALIDUSERGROUP' );
         $oEx->setVoucherNr( $this->oxvouchers__oxvouchernr->value );
         throw $oEx;
     }
@@ -558,7 +558,7 @@ class oxVoucher extends oxBase
     /**
      * Returns basket item information array from session or order.
      *
-     * @param oxDisvount $oDiscount discount object
+     * @param oxDiscount $oDiscount discount object
      *
      * @return array
      */
@@ -576,7 +576,7 @@ class oxVoucher extends oxBase
     /**
      * Returns basket item information (id,amount,price) array takig item list from order.
      *
-     * @param oxDisvount $oDiscount discount object
+     * @param oxDiscount $oDiscount discount object
      *
      * @return array
      */
@@ -708,7 +708,7 @@ class oxVoucher extends oxBase
         // Basket Item Count and isAdmin check (unble to access property $oOrder->_getOrderBasket()->_blSkipVouchersAvailabilityChecking)
         if (!count($aBasketItems) && !$this->isAdmin() ) {
             $oEx = oxNew( 'oxVoucherException' );
-            $oEx->setMessage('EXCEPTION_VOUCHER_NOVOUCHER');
+            $oEx->setMessage('ERROR_MESSAGE_VOUCHER_NOVOUCHER');
             $oEx->setVoucherNr($this->oxvouchers__oxvouchernr->value);
             throw $oEx;
         }
@@ -762,7 +762,7 @@ class oxVoucher extends oxBase
         // Basket Item Count and isAdmin check (unble to access property $oOrder->_getOrderBasket()->_blSkipVouchersAvailabilityChecking)
         if ( !count( $aBasketItems ) && !$this->isAdmin() ) {
             $oEx = oxNew( 'oxVoucherException' );
-            $oEx->setMessage('EXCEPTION_VOUCHER_NOVOUCHER');
+            $oEx->setMessage('ERROR_MESSAGE_VOUCHER_NOVOUCHER');
             $oEx->setVoucherNr($this->oxvouchers__oxvouchernr->value);
             throw $oEx;
         }

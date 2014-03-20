@@ -23,7 +23,7 @@
 
 /**
  * Payment manager.
- * Performs mayment methods, such as assigning to someone, returning value etc.
+ * Performs payment methods, such as assigning to someone, returning value etc.
  *
  * @package model
  */
@@ -68,7 +68,7 @@ class oxPayment extends oxI18n
 
     /**
      * Countries assigned to current payment. Value from outside accessible
-     * by calling oxpayment::getCountries
+     * by calling oxPayment::getCountries
      *
      * @var array
      */
@@ -134,13 +134,13 @@ class oxPayment extends oxI18n
     /**
      * Payment groups getter. Returns groups list
      *
-     * @return oxlist
+     * @return oxList
      */
     public function getGroups()
     {
         if ( $this->_oGroups == null && ( $sOxid = $this->getId() ) ) {
 
-            // usergroups
+            // user groups
             $this->_oGroups = oxNew( 'oxlist', 'oxgroups' );
             $sViewName = getViewName( "oxgroups", $this->getLanguage() );
 
@@ -167,7 +167,7 @@ class oxPayment extends oxI18n
     }
 
     /**
-     * sets a single dyn value
+     * Sets a single dyn value
      *
      * @param mixed $oKey the key
      * @param mixed $oVal the value
@@ -200,23 +200,23 @@ class oxPayment extends oxI18n
     /**
      * Returns additional taxes to base article price.
      *
-     * @param double $dBaseprice Base article price
+     * @param double $dBasePrice Base article price
      *
      * @return double
      */
-    public function getPaymentValue( $dBaseprice )
+    public function getPaymentValue( $dBasePrice )
     {
         $dRet = 0;
 
         if ( $this->oxpayments__oxaddsumtype->value == "%") {
-            $dRet = $dBaseprice * $this->oxpayments__oxaddsum->value/100;
+            $dRet = $dBasePrice * $this->oxpayments__oxaddsum->value/100;
         } else {
             $oCur = $this->getConfig()->getActShopCurrencyObject();
             $dRet = $this->oxpayments__oxaddsum->value * $oCur->rate;
         }
 
-        if ( ($dRet * -1 ) > $dBaseprice ) {
-            $dRet = $dBaseprice;
+        if ( ($dRet * -1 ) > $dBasePrice ) {
+            $dRet = $dBasePrice;
         }
 
         return $dRet;
@@ -226,7 +226,7 @@ class oxPayment extends oxI18n
      * Returns base basket price for payment cost calculations. Price depends on
      * payment setup (payment administration)
      *
-     * @param oxbasket $oBasket oxbasket object
+     * @param oxBasket $oBasket oxBasket object
      *
      * @return double
      */
@@ -289,11 +289,11 @@ class oxPayment extends oxI18n
     /**
      * Returns price object for current payment applied on basket
      *
-     * @param oxuserbasket $oBasket session basket
+     * @param oxUserBasket $oBasket session basket
      *
      * @deprecated since v5.0.0 (2011-09-27); use calculatePrice() method
      *
-     * @return oxprice
+     * @return oxPrice
      */
     public function getPaymentPrice( $oBasket )
     {
@@ -304,7 +304,7 @@ class oxPayment extends oxI18n
     /**
      * Returns price object for current payment applied on basket
      *
-     * @param oxuserbasket $oBasket session basket
+     * @param oxUserBasket $oBasket session basket
      *
      * @return null
      */
@@ -332,11 +332,10 @@ class oxPayment extends oxI18n
 
     }
 
-
     /**
      * Returns calculated price.
      *
-     * @return oxprice
+     * @return oxPrice
      */
     public function getPrice()
     {
@@ -344,7 +343,9 @@ class oxPayment extends oxI18n
     }
 
     /**
-     * Returns formated netto price.
+     * Returns formatted netto price.
+     *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
      *
      * @return string
      */
@@ -356,7 +357,9 @@ class oxPayment extends oxI18n
     }
 
     /**
-     * Returns formated brutto price.
+     * Returns formatted brutto price.
+     *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
      *
      * @return string
      */
@@ -368,7 +371,9 @@ class oxPayment extends oxI18n
     }
 
     /**
-     * Returns formated vat value.
+     * Returns formatted vat value.
+     *
+     * @deprecated in v4.8/5.1 on 2013-10-14; for formatting use oxPrice smarty plugin
      *
      * @return string
      */
@@ -426,15 +431,15 @@ class oxPayment extends oxI18n
     /**
      * Function checks if loaded payment is valid to current basket
      *
-     * @param array  $aDynvalue    dynamical value (in this case oxidcreditcard and oxiddebitnote are checked only)
+     * @param array  $aDynValue    dynamical value (in this case oxidcreditcard and oxiddebitnote are checked only)
      * @param string $sShopId      id of current shop
-     * @param oxuser $oUser        the current user
-     * @param double $dBasketPrice the current basket price (oBasket->dprice)
+     * @param oxUser $oUser        the current user
+     * @param double $dBasketPrice the current basket price (oBasket->dPrice)
      * @param string $sShipSetId   the current ship set
      *
      * @return bool true if payment is valid
      */
-    public function isValidPayment( $aDynvalue, $sShopId, $oUser, $dBasketPrice, $sShipSetId )
+    public function isValidPayment( $aDynValue, $sShopId, $oUser, $dBasketPrice, $sShipSetId )
     {
         $myConfig = $this->getConfig();
         if ( $this->oxpayments__oxid->value == 'oxempty' ) {
@@ -455,7 +460,12 @@ class oxPayment extends oxI18n
             return true;
         }
 
-        if ( !oxRegistry::get("oxInputValidator")->validatePaymentInputData( $this->oxpayments__oxid->value, $aDynvalue ) ) {
+        $mxValidationResult = oxRegistry::get("oxInputValidator")->validatePaymentInputData( $this->oxpayments__oxid->value, $aDynValue );
+
+        if ( is_integer($mxValidationResult) ) {
+            $this->_iPaymentError = $mxValidationResult;
+            return false;
+        } elseif ($mxValidationResult === false) {
             $this->_iPaymentError = 1;
             return false;
         }

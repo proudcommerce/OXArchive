@@ -518,7 +518,7 @@ class oxUser extends oxBase
         //add registered remark
         if ( $blAddRemark && $blRet ) {
             $oRemark = oxNew( 'oxremark' );
-            $oRemark->oxremark__oxtext     = new oxField(oxRegistry::getLang()->translateString( 'usrRegistered' ), oxField::T_RAW);
+            $oRemark->oxremark__oxtext     = new oxField(oxRegistry::getLang()->translateString( 'usrRegistered', null, true ), oxField::T_RAW);
             $oRemark->oxremark__oxtype     = new oxField('r', oxField::T_RAW);
             $oRemark->oxremark__oxparentid = new oxField($this->getId(), oxField::T_RAW);
             $oRemark->save();
@@ -826,7 +826,7 @@ class oxUser extends oxBase
             if ( $oDb->getOne( $sQ, false, false ) ) {
                 $oEx = oxNew( 'oxUserException' );
                 $oLang = oxRegistry::getLang();
-                $oEx->setMessage( sprintf( $oLang->translateString( 'EXCEPTION_USER_USEREXISTS', $oLang->getTplLanguage() ), $this->oxuser__oxusername->value ) );
+                $oEx->setMessage( sprintf( $oLang->translateString( 'ERROR_MESSAGE_USER_USEREXISTS', $oLang->getTplLanguage() ), $this->oxuser__oxusername->value ) );
                 throw $oEx;
             }
         }
@@ -1305,7 +1305,7 @@ class oxUser extends oxBase
                 $sSelect = "select $sWhat from oxuser where oxrights = 'malladmin' ";
             } elseif ( $blDemoMode ) {
                 $oEx = oxNew( 'oxUserException' );
-                $oEx->setMessage( 'EXCEPTION_USER_NOVALIDLOGIN' );
+                $oEx->setMessage( 'ERROR_MESSAGE_USER_NOVALIDLOGIN' );
                 throw $oEx;
             }
         }
@@ -1335,7 +1335,7 @@ class oxUser extends oxBase
     /**
      * Load saved user basket from the database after he logs in
      *
-     * @deprecated move this functionality in MAJOR version to function which calls login method (e.g. component or so)
+     * @deprecated v5.0.1 move this functionality in MAJOR version to function which calls login method (e.g. component or so)
      *
      * @return null
      */
@@ -1370,7 +1370,7 @@ class oxUser extends oxBase
     {
         if ( $this->isAdmin() && !count( oxRegistry::get("oxUtilsServer")->getOxCookie() ) ) {
             $oEx = oxNew( 'oxCookieException' );
-            $oEx->setMessage( 'EXCEPTION_COOKIE_NOCOOKIE' );
+            $oEx->setMessage( 'ERROR_MESSAGE_COOKIE_NOCOOKIE' );
             throw $oEx;
         }
 
@@ -1387,7 +1387,7 @@ class oxUser extends oxBase
 
                 if ( !$this->load( $sOXID ) ) {
                     $oEx = oxNew( 'oxUserException' );
-                    $oEx->setMessage( 'EXCEPTION_USER_NOVALIDLOGIN' );
+                    $oEx->setMessage( 'ERROR_MESSAGE_USER_NOVALIDLOGIN' );
                     throw $oEx;
                 }
             }
@@ -1415,7 +1415,7 @@ class oxUser extends oxBase
             return true;
         } else {
             $oEx = oxNew( 'oxUserException' );
-            $oEx->setMessage( 'EXCEPTION_USER_NOVALIDLOGIN' );
+            $oEx->setMessage( 'ERROR_MESSAGE_USER_NOVALIDLOGIN' );
             throw $oEx;
         }
     }
@@ -1538,6 +1538,7 @@ class oxUser extends oxBase
      */
     protected function _getCookieUserId()
     {
+        $sUserID = null;
         $oConfig = $this->getConfig();
         $sShopID = $oConfig->getShopId();
         if ( ( $sSet = oxRegistry::get("oxUtilsServer")->getUserCookie( $sShopID ) ) ) {

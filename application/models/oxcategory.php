@@ -111,7 +111,7 @@ class oxCategory extends oxI18n implements oxIUrl
      * @var bool
      */
     protected $_blTopCategory = null;
-    
+
     /**
      * Standard/dynamic article urls for languages
      *

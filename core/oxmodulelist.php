@@ -111,6 +111,16 @@ class oxModuleList extends oxSuperCfg
     }
 
     /**
+     * Get the list of modules
+     *
+     * @return array
+     */
+    public function getModules()
+    {
+        return $this->getConfig()->getConfigParam('aModules');
+    }
+
+    /**
      * Get legacy modules list
      *
      * @return array

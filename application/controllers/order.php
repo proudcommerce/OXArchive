@@ -517,7 +517,7 @@ class order extends oxUBase
         $aPaths = array();
         $aPath  = array();
 
-        $aPath['title'] = oxRegistry::getLang()->translateString( 'PAGE_CHECKOUT_ORDER', oxRegistry::getLang()->getBaseLanguage(), false );
+        $aPath['title'] = oxRegistry::getLang()->translateString( 'COMPLETE_ORDER', oxRegistry::getLang()->getBaseLanguage(), false );
         $aPath['link']  = $this->getLink();
 
         $aPaths[] = $aPath;

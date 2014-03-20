@@ -821,6 +821,19 @@ class oxSession extends oxSuperCfg
     }
 
     /**
+     * Checks if current session id is the same as in originally received cookie.
+     * This method is intended to indicate if new session cookie
+     * is to be sent as header from this script execution.
+     *
+     * @return bool
+     */
+    public function isActualSidInCookie()
+    {
+        $blReturn = (isset($_COOKIE[$this->getName()]) &&  ($_COOKIE[$this->getName()] == $this->getId()));
+        return $blReturn;
+    }
+
+    /**
      * Appends url with session ID, but only if oxSession::_isSidNeeded() returns true
      * Direct usage of this method to retrieve end url result is discouraged - instead
      * see oxUtilsUrl::processUrl

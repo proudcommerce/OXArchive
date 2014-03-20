@@ -206,7 +206,7 @@ class oxView extends oxSuperCfg
      *
      * @param string $sKey parameter key
      *
-     * @return array
+     * @return string
      */
     public function getViewParameter( $sKey )
     {
@@ -752,6 +752,54 @@ class oxView extends oxSuperCfg
     }
 
     /**
+     * Returns if current shop is beta version.
+     *
+     * @return bool
+     */
+    public function isBetaVersion()
+    {
+        $blbetaVersion = false;
+
+        if ( stripos( $this->getConfig()->getVersion(), 'beta' ) !== false ) {
+            $blbetaVersion = true;
+        }
+
+        return $blbetaVersion;
+    }
+
+    /**
+     * Returns if current shop is release candidate version.
+     *
+     * @return bool
+     */
+    public function isRCVersion()
+    {
+        $blRCVersion = false;
+
+        if ( stripos( $this->getConfig()->getVersion(), 'rc' ) !== false ) {
+            $blRCVersion = true;
+        }
+
+        return $blRCVersion;
+    }
+
+    /**
+     * Template variable getter. Returns if beta note can be displayed (for header.tpl)
+     *
+     * @return bool
+     */
+    public function showBetaNote()
+    {
+        $blBetaNote = false;
+
+        if ( $this->isBetaVersion() || $this->isRCVersion() ) {
+            $blBetaNote = true;
+        }
+
+        return $blBetaNote;
+    }
+
+    /**
      * Returns if current shop is demoshop
      *
      * @return string
@@ -792,6 +840,8 @@ class oxView extends oxSuperCfg
     /**
      * Template variable getter. Returns shop logo from config option
      *
+     * @deprecated since v5.1.0 (2013-09-23); Use oxViewConfig::getShopLogo().
+     *
      * @return string
      */
     public function getShopLogo()
@@ -807,6 +857,8 @@ class oxView extends oxSuperCfg
      * Sets shop logo
      *
      * @param string $sLogo shop logo url
+     *
+     * @deprecated since v5.1.0 (2013-09-23); Use oxViewConfig::setShopLogo().
      *
      * @return null
      */
@@ -968,6 +1020,26 @@ class oxView extends oxSuperCfg
     public function showRdfa()
     {
         return false;
+    }
+
+
+    /**
+     * Returns session ID, but only in case it is needed to be included for widget calls.
+     * This basically happens on session change,
+     * when session cookie is not equals to the actual session ID.
+     *
+     * @return string
+     */
+    public function getSidForWidget()
+    {
+        $sRet = null;
+        $oSession = $this->getSession();
+
+        if (!$oSession->isActualSidInCookie() ) {
+            $sRet = $oSession->getId();
+        }
+
+        return $sRet;
     }
 
 }

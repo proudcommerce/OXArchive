@@ -35,17 +35,17 @@ class Shop_License extends Shop_Config
      */
     protected $_sThisTemplate = "shop_license.tpl";
 
-    
+
     /**
      * Getting current shop version links for editions
-     * @var array 
+     * @var array
      */
     protected $_aVersionCheckLinks = array(
             "EE" => "http://admin.oxid-esales.com/EE/onlinecheck.php",
             "PE" => "http://admin.oxid-esales.com/PE/onlinecheck.php",
             "CE" => "http://admin.oxid-esales.com/CE/onlinecheck.php"
     );
-    
+
 
     /**
      * Executes parent method parent::render(), creates oxshop object, passes it's
@@ -103,12 +103,12 @@ class Shop_License extends Shop_Config
 
         return true;
     }
-    
+
     /**
      * Fetch current shop version information from url
-     * 
+     *
      * @param string $sUrl current version info fetching url by edition
-     * 
+     *
      * @return string
      */
     protected function _fetchCurVersionInfo( $sUrl )
@@ -117,19 +117,21 @@ class Shop_License extends Shop_Config
         $oLang = oxRegistry::getLang();
         $iLang = $oLang->getTplLanguage();
         $sLang = $oLang->getLanguageAbbr( $iLang );
-        
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $aParams);
-        curl_setopt($ch, CURLOPT_URL, $sUrl . "/" . $sLang);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $sOutput = curl_exec($ch);
-        curl_close($ch);
-        
+
+        $oCurl = oxNew('oxCurl');
+        $oCurl->setMethod("POST");
+        $oCurl->setUrl($sUrl . "/" . $sLang);
+        $oCurl->setParameters($aParams);
+        $sOutput = $oCurl->execute();
+
         $sOutput = strip_tags($sOutput, "<br>, <b>");
         $aResult = explode("<br>", $sOutput);
         if ( strstr( $aResult[5], "update" ) ) {
-            $aResult[5] = "<a id='linkToUpdate' href='http://wiki.oxidforge.org/Category:Downloads' target='_blank'>" . $aResult[5] . "</a>";
+            $sUpdateLink = 'http://wiki.oxidforge.org/Category:Downloads';
+            if ( !OXID_VERSION_PE_CE ) {
+                $sUpdateLink = oxRegistry::getLang()->translateString( "VERSION_UPDATE_LINK" );
+            }
+            $aResult[5] = "<a id='linkToUpdate' href='$sUpdateLink' target='_blank'>" . $aResult[5] . "</a>";
         }
         $sOutput = implode("<br>", $aResult);
 

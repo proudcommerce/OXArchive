@@ -446,7 +446,7 @@ class oxcmp_user extends oxView
 
         $myConfig = $this->getConfig();
         if ( $blActiveLogin && !oxConfig::getParameter( 'ord_agb' ) && $myConfig->getConfigParam( 'blConfirmAGB' ) ) {
-            oxRegistry::get("oxUtilsView")->addErrorToDisplay( 'ORDER_READANDCONFIRMTERMS', false, true );
+            oxRegistry::get("oxUtilsView")->addErrorToDisplay( 'READ_AND_CONFIRM_TERMS', false, true );
             return;
         }
 
@@ -624,6 +624,7 @@ class oxcmp_user extends oxView
             return;
         } catch(oxInputException $oEx) {
             oxRegistry::get("oxUtilsView")->addErrorToDisplay($oEx, false, true);
+            oxRegistry::get("oxUtilsView")->addErrorToDisplay($oEx, false, true, 'input_not_all_fields');
             return;
         } catch(oxConnectionException $oEx){
              //connection to external resource broken, change message and pass to the view

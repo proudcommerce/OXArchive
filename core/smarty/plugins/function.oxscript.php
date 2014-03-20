@@ -56,6 +56,12 @@ function smarty_function_oxscript($params, &$smarty)
     $aInclude             = (array) $myConfig->getGlobalParameter($sIncludes);
     $sOutput              = '';
 
+    $blAjaxRequest = false;
+    if (isset($_SERVER['HTTP_X_REQUESTED_WITH'])
+        AND strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+        $blAjaxRequest = true;
+    }
+
 
     if ( $params['add'] ) {
         $sScript = trim( $params['add'] );
@@ -94,26 +100,28 @@ function smarty_function_oxscript($params, &$smarty)
             $aInclude[$iPriority]   = array_unique($aInclude[$iPriority]);
             $myConfig->setGlobalParameter($sIncludes, $aInclude);
         }
-    } elseif ( !$sWidget || $blInWidget ) {
-        // Form output for includes.
-        $sOutput .= _oxscript_include( $aInclude, $sWidget );
-        $myConfig->setGlobalParameter( $sIncludes, null );
-        if ( $sWidget ) {
-            $aIncludeDyn = (array) $myConfig->getGlobalParameter( $sIncludes .'_dynamic' );
-            $sOutput .= _oxscript_include( $aIncludeDyn, $sWidget );
-            $myConfig->setGlobalParameter( $sIncludes .'_dynamic', null );
+    } elseif ( !$sWidget || $blInWidget || $blAjaxRequest ) {
+        if ( !$blAjaxRequest ) {
+            // Form output for includes.
+            $sOutput .= _oxscript_include( $aInclude, $sWidget );
+            $myConfig->setGlobalParameter( $sIncludes, null );
+            if ( $sWidget ) {
+                $aIncludeDyn = (array) $myConfig->getGlobalParameter( $sIncludes .'_dynamic' );
+                $sOutput .= _oxscript_include( $aIncludeDyn, $sWidget );
+                $myConfig->setGlobalParameter( $sIncludes .'_dynamic', null );
+            }
         }
 
         // Form output for adds.
         $sScriptOutput = '';
-        $sScriptOutput .= _oxscript_execute( $aScript, $sWidget, $sScripts );
+        $sScriptOutput .= _oxscript_execute( $aScript, $sWidget, $blAjaxRequest );
         $myConfig->setGlobalParameter( $sScripts, null );
         if ( $sWidget ) {
             $aScriptDyn = (array) $myConfig->getGlobalParameter( $sScripts .'_dynamic' );
-            $sScriptOutput .= _oxscript_execute( $aScriptDyn, $sWidget, $sScripts );
+            $sScriptOutput .= _oxscript_execute( $aScriptDyn, $sWidget, $blAjaxRequest );
             $myConfig->setGlobalParameter( $sScripts .'_dynamic', null );
         }
-        $sOutput .= _oxscript_execute_enclose( $sScriptOutput, $sWidget );
+        $sOutput .= _oxscript_execute_enclose( $sScriptOutput, $sWidget, $blAjaxRequest );
     }
 
     return $sOutput;
@@ -129,9 +137,7 @@ function smarty_function_oxscript($params, &$smarty)
  */
 function _oxscript_include( $aInclude, $sWidget )
 {
-    $myConfig    = oxRegistry::getConfig();
     $sOutput     = '';
-    $sLoadOutput = '';
 
     if ( !count( $aInclude ) ) {
         return '';
@@ -140,13 +146,13 @@ function _oxscript_include( $aInclude, $sWidget )
     // Sort by priority.
     ksort( $aInclude );
     $aUsedSrc = array();
-    $aWidgets = array();
+    $aWidgets = '';
     foreach ( $aInclude as $aPriority ) {
         foreach ( $aPriority as $sSrc ) {
             // Check for duplicated lower priority resources #3062.
             if ( !in_array( $sSrc, $aUsedSrc )) {
                 if ( $sWidget ) {
-                    $aWidgets[] = $sSrc;
+                    $aWidgets .= 'WidgetsHandler.registerFile( "'. $sSrc . '", "'.$sWidget.'" );'. PHP_EOL;
                 } else {
                     $sOutput .= '<script type="text/javascript" src="'.$sSrc.'"></script>'.PHP_EOL;
                 }
@@ -156,11 +162,9 @@ function _oxscript_include( $aInclude, $sWidget )
     }
 
     if ( $sWidget && count( $aWidgets ) ) {
-        $sLoadOutput .= 'if ( load_oxwidgets ==undefined ) { var load_oxwidgets = new Array(); }'."\n";
-        $sLoadOutput .= 'var load_'. strtolower( $sWidget ) .'= new Array("'. implode( '","', $aWidgets ) . "\");". PHP_EOL;
-        $sLoadOutput .= 'load_oxwidgets=load_oxwidgets.concat(load_'. strtolower( $sWidget ) .');'."\n";
-
-        $sOutput .= '<script type="text/javascript">' . PHP_EOL . $sLoadOutput . '</script>' . PHP_EOL;
+        $sOutput .= '<script type="text/javascript">' . PHP_EOL
+            .'window.addEventListener("load", function() {'. PHP_EOL . $aWidgets .'}, false )' . PHP_EOL
+            .'</script>' . PHP_EOL;
     }
 
     return $sOutput;
@@ -169,19 +173,25 @@ function _oxscript_include( $aInclude, $sWidget )
 /**
  * Form output for adds.
  *
- * @param array  $aScript scripts to execute (from add).
- * @param string $sWidget widget name.
+ * @param array  $aScript     scripts to execute (from add).
+ * @param string $sWidget     widget name.
+ * @param bool $blAjaxRequest is ajax request
  *
  * @return string
  */
-function _oxscript_execute( $aScript, $sWidget )
+function _oxscript_execute( $aScript, $sWidget, $blAjaxRequest )
 {
     $myConfig = oxRegistry::getConfig();
     $sOutput  = '';
 
     if (count($aScript)) {
         foreach ($aScript as $sScriptToken) {
-            $sOutput .= $sScriptToken. PHP_EOL;
+            if ( $sWidget && !$blAjaxRequest ) {
+                $sScriptTokenSanitized = str_replace( '"', '\"', $sScriptToken );
+                $sOutput .= 'WidgetsHandler.registerFunction( "'. $sScriptTokenSanitized . '", "'.$sWidget.'");'. PHP_EOL ;
+            } else {
+                $sOutput .= $sScriptToken. PHP_EOL;
+            }
         }
     }
 
@@ -193,19 +203,20 @@ function _oxscript_execute( $aScript, $sWidget )
  *
  * @param string $sScriptsOutput javascript to be enclosed.
  * @param string $sWidget        widget name.
+ * @param bool $blAjaxRequest    is ajax request
  *
  * @return string
  */
-function _oxscript_execute_enclose( $sScriptsOutput, $sWidget )
+function _oxscript_execute_enclose( $sScriptsOutput, $sWidget, $blAjaxRequest )
 {
-    if ( !$sScriptsOutput && !$sWidget ) {
+    if ( !$sScriptsOutput ) {
         return '';
     }
 
     $sOutput  = '';
     $sOutput .= '<script type="text/javascript">' . PHP_EOL;
-    if ( $sWidget ) {
-        $sOutput .= 'function init_'. strtolower( $sWidget ) .'() {'. PHP_EOL . $sScriptsOutput .'}'. PHP_EOL;
+    if ( $sWidget && !$blAjaxRequest ) {
+        $sOutput .= 'window.addEventListener("load", function() {'. PHP_EOL . $sScriptsOutput .'}, false )'. PHP_EOL;
     } else {
         $sOutput .= $sScriptsOutput;
     }

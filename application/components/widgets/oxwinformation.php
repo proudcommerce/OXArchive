@@ -29,10 +29,52 @@
 class oxwInformation extends oxWidget
 {
     /**
-     * Current class template name.
+     * Current class template name
      *
      * @var string
      */
     protected $_sThisTemplate = 'widget/footer/info.tpl';
 
+    /**
+     * @var oxContentList
+     */
+    protected $_oContentList;
+
+    /**
+     * Returns service keys.
+     *
+     * @return array
+     */
+    public function getServicesKeys()
+    {
+        $oContentList = $this->_getContentList();
+        return $oContentList->getServiceKeys();
+    }
+
+    /**
+     * Get services content list
+     *
+     * @return array
+     */
+    public function getServicesList()
+    {
+        $oContentList = $this->_getContentList();
+        $oContentList->loadServices();
+
+        return $oContentList;
+    }
+
+    /**
+     * Returns content list object.
+     *
+     * @return object|oxContentList
+     */
+    protected function _getContentList()
+    {
+        if ( !$this->_oContentList ) {
+            $this->_oContentList = oxNew( "oxContentList" );
+        }
+
+        return $this->_oContentList;
+    }
 }

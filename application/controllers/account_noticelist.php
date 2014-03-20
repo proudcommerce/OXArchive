@@ -95,6 +95,22 @@ class Account_Noticelist extends Account
     }
 
     /**
+     * Returns array from parent::getNavigationParams(). If current request
+     * contains "sourcecl" and "anid" parameters - appends array with this
+     * data. Array is used to fill forms and append shop urls with actual
+     * state parameters
+     *
+     * @return array
+     */
+    public function getNavigationParams()
+    {
+        $aParams = parent::getNavigationParams();
+
+
+        return $aParams;
+    }
+
+    /**
      * Template variable getter. Returns an array if there is something in the list
      *
      * @return array
@@ -159,11 +175,11 @@ class Account_Noticelist extends Account
         $aPaths = array();
         $aPath  = array();
 
-        $aPath['title'] = oxRegistry::getLang()->translateString( 'PAGE_ACCOUNT_MY_ACCOUNT', oxRegistry::getLang()->getBaseLanguage(), false );
+        $aPath['title'] = oxRegistry::getLang()->translateString( 'MY_ACCOUNT', oxRegistry::getLang()->getBaseLanguage(), false );
         $aPath['link']  =  oxRegistry::get("oxSeoEncoder")->getStaticUrl( $this->getViewConfig()->getSelfLink() . "cl=account" );
         $aPaths[] = $aPath;
 
-        $aPath['title'] = oxRegistry::getLang()->translateString( 'PAGE_ACCOUNT_NOTICELIST_MYWISHLIST', oxRegistry::getLang()->getBaseLanguage(), false );
+        $aPath['title'] = oxRegistry::getLang()->translateString( 'MY_WISH_LIST', oxRegistry::getLang()->getBaseLanguage(), false );
         $aPath['link']  = $this->getLink();
         $aPaths[] = $aPath;
 
